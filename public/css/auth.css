@@ -1,0 +1,225 @@
+﻿:root {
+    --primary: #DC2626;
+    --primary-hover: #B91C1C;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --border: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-muted: #94A3B8;
+    --text-secondary: #64748B;
+    --input-focus: rgba(220, 38, 38, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-brand {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+}
+
+.auth-card {
+    background: var(--surface);
+    width: 100%;
+    border-radius: 28px;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-icon-badge {
+    width: 64px;
+    height: 64px;
+    background: var(--primary);
+    color: #FFFFFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 16px -4px rgba(220, 38, 38, 0.3);
+}
+
+.auth-icon-badge svg {
+    width: 32px;
+    height: 32px;
+}
+
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.03em;
+}
+
+.auth-subtitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.auth-form {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+    background: var(--surface);
+    font-family: inherit;
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--input-focus);
+}
+
+.forgot-link {
+    display: block;
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    margin-top: -0.5rem;
+}
+
+.btn-primary {
+    width: 100%;
+    background: var(--primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 99px;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px -5px rgba(220, 38, 38, 0.5);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.auth-footer a {
+    color: var(--text-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+}
+.back-link:hover {
+    color: var(--text-primary);
+}
