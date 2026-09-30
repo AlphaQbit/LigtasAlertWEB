@@ -14,9 +14,6 @@ function switchTab(tabName) {
     });
 }
 
-function logout() {
-    window.location.href = '/login';
-}
 
 function init() {
     loadStats();
