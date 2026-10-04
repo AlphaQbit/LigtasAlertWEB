@@ -67,6 +67,23 @@
             </div>
         </div>
 
+        <div id="contactsTab" class="tab-content" style="display: none;">
+            <div class="alerts-section">
+                <div class="section-title">Contacts</div>
+                <div class="loading">
+                    Not built yet. Point this at your facilities/responders table when you add one.
+                </div>
+            </div>
+        </div>
+
+        <div id="historyTab" class="tab-content" style="display: none;">
+            <div class="alerts-section">
+                <div class="section-title">History</div>
+                <div class="loading">
+                    Not built yet. The dashboard list above already shows resolved alerts -
+                    filter it here once you need a dedicated archive view.
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
-

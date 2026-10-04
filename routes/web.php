@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,5 +14,14 @@ Route::get('/auth/microsoft/redirect', [AuthController::class, 'microsoftRedirec
 Route::get('/auth/microsoft/callback', [AuthController::class, 'microsoftCallback'])->name('microsoft.callback');
 
 Route::view('/admin', 'admin')->middleware('auth')->name('admin');
+
+// Dashboard data + status updates. The web app keeps its session cookie, so
+// these are plain session-authenticated JSON routes rather than Sanctum.
+Route::get('/admin/alerts', [AlertController::class, 'index'])
+    ->middleware('auth')
+    ->name('alerts.index');
+Route::patch('/admin/alerts/{alert}/status', [AlertController::class, 'updateStatus'])
+    ->middleware('auth')
+    ->name('alerts.status');
 
 Route::redirect('/', '/login');
