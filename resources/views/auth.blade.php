@@ -8,56 +8,55 @@
 </head>
 <body>
 
-    <div class="auth-wrapper">
-        <div class="auth-brand">LigtasAlert</div>
-        
-        <div class="auth-card">
+<div class="auth-wrapper">
+    <header class="auth-brand-header">
+        <div class="auth-icon-badge" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.5 3.5 5.7v5.5c0 5.1 3.5 9.4 8.5 11.3 5-1.9 8.5-6.2 8.5-11.3V5.7L12 2.5Zm0 3.2 5.5 2.1v3.4c0 3.6-2.2 6.8-5.5 8.4-3.3-1.6-5.5-4.8-5.5-8.4V7.8L12 5.7Z"/>
+            </svg>
+        </div>
+        <h1 class="auth-brand-title">LigtasAlert</h1>
+    </header>
+
+    <div class="auth-card">
             
             <!-- LOGIN FORM -->
-            <div id="form-login" class="auth-form {{ ($mode ?? '') === 'login' ? 'active' : '' }}">
-                <div class="auth-header">
-                    <div class="auth-icon-badge">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4" />
-                            <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
-                        </svg>
-                    </div>
-                    <h1 class="auth-title">Welcome back</h1>
-                    <div class="auth-subtitle">Emergency Response System</div>
+            <div id="form-login" class="auth-form login-form {{ ($mode ?? '') === 'login' ? 'active' : '' }}">
+                <div class="auth-header login-heading">
+                    <h2 class="auth-title">Welcome back</h2>
                 </div>
 
                 <form method="POST" action="{{ route('login.store') }}">
-                            @csrf
-                            @if (session('status'))
-                                <div class="auth-success">{{ session('status') }}</div>
-                            @endif
-                            @if ($errors->any())
-                                <div class="auth-error">{{ $errors->first() }}</div>
-                            @endif
+                    @csrf
+                    @if (session('status'))
+                        <div class="auth-success">{{ session('status') }}</div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="auth-error">{{ $errors->first() }}</div>
+                    @endif
                     <div class="input-group">
-                        <label class="input-label">Email address</label>
+                        <label class="input-label" for="login-email">Email address</label>
                         <div class="input-wrapper">
                             <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
-                            <input type="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="name@example.com" required autocomplete="email">
+                            <input id="login-email" type="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="Email" required autocomplete="email">
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label class="input-label">Password</label>
+                        <label class="input-label" for="login-password">Password</label>
                         <div class="input-wrapper">
                             <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            <input type="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                            <input id="login-password" type="password" name="password" class="form-input" placeholder="Password" required autocomplete="current-password">
                         </div>
                     </div>
 
                     <a href="#" class="forgot-link" onclick="return false;">Forgot password?</a>
-
-                    <a href="{{ route('microsoft.redirect') }}" class="btn-microsoft">
+                    <button type="submit" class="btn-primary">Log In</button>
+                    <a href="{{ route('microsoft.redirect') }}" class="btn-microsoft login-microsoft">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="18" height="18" aria-hidden="true">
                             <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
                             <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
@@ -68,11 +67,12 @@
                     </a>
 
                     <div class="auth-divider"><span>or</span></div>
-                    <button type="submit" class="btn-primary">LOG IN</button>
-                    
-                    <div class="auth-footer">
-                        New to LigtasAlert? <a href="{{ route('register') }}">Register</a>
-                    </div>
+                    <a href="{{ route('register') }}" class="auth-create-account">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M15 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Zm-8-1V8H5v3H2v2h3v3h2v-3h3v-2H7Zm8 3c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4Z"/>
+                        </svg>
+                        Create an account
+                    </a>
                 </form>
             </div>
 
@@ -91,13 +91,13 @@
                 </div>
 
                 <form method="POST" action="{{ route('register.store') }}">
-                            @csrf
-                            @if (session('status'))
-                                <div class="auth-success">{{ session('status') }}</div>
-                            @endif
-                            @if ($errors->any())
-                                <div class="auth-error">{{ $errors->first() }}</div>
-                            @endif
+                    @csrf
+                    @if (session('status'))
+                        <div class="auth-success">{{ session('status') }}</div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="auth-error">{{ $errors->first() }}</div>
+                    @endif
                     <div class="input-group">
                         <label class="input-label">Full Name</label>
                         <div class="input-wrapper">
@@ -150,6 +150,7 @@
         </div>
     </div>
 
+    <footer class="auth-site-footer">mcc.edu.ph</footer>
 
 </body>
 </html>
