@@ -179,6 +179,82 @@
             gap: 1rem;
         }
 
+        .contacts-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .responder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .responder-card {
+            display: grid;
+            align-content: start;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .responder-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .responder-mark {
+            display: grid;
+            width: 2.75rem;
+            height: 2.75rem;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--active);
+            color: var(--primary);
+            font-size: 1.125rem;
+            font-weight: 800;
+        }
+
+        .responder-name {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .responder-type {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .responder-numbers {
+            display: grid;
+            gap: 0.625rem;
+        }
+
+        .responder-phone {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+        }
+
+        .responder-phone:hover,
+        .responder-phone:focus-visible {
+            border-color: var(--primary);
+            background: var(--active);
+            color: var(--primary-hover);
+        }
+
         .section-title {
             font-size: 1.125rem;
             font-weight: 800;
@@ -513,9 +589,9 @@
 
         /* History Tab */
         .history-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
         }
 
         .history-item {

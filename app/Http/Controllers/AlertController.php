@@ -22,8 +22,17 @@ class AlertController extends Controller
             ->limit(100)
             ->get();
 
+        $history = Alert::query()
+            ->where('status', Alert::STATUS_RESOLVED)
+            ->when($request->filled('facility'),
+                fn ($query) => $query->where('facility', $request->string('facility')))
+            ->latest('resolved_at')
+            ->limit(100)
+            ->get();
+
         return response()->json([
             'data' => $alerts,
+            'history' => $history,
             'stats' => $this->stats(),
         ]);
     }

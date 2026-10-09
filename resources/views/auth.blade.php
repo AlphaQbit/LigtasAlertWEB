@@ -23,7 +23,7 @@
             <!-- LOGIN FORM -->
             <div id="form-login" class="auth-form login-form {{ ($mode ?? '') === 'login' ? 'active' : '' }}">
                 <div class="auth-header login-heading">
-                    <h2 class="auth-title">Welcome back</h2>
+                    <h2 class="auth-title">Log In</h2>
                 </div>
 
                 <form method="POST" action="{{ route('login.store') }}">

@@ -69,19 +69,80 @@
 
         <div id="contactsTab" class="tab-content" style="display: none;">
             <div class="alerts-section">
-                <div class="section-title">Contacts</div>
-                <div class="loading">
-                    Not built yet. Point this at your facilities/responders table when you add one.
+                <div>
+                    <div class="section-title">Mabalacat City Emergency Hotlines</div>
+                    <p class="contacts-description">Call a responder directly for emergency assistance.</p>
+                </div>
+                <div class="responder-grid">
+                    <section class="responder-card">
+                        <div class="responder-heading">
+                            <span class="responder-mark" aria-hidden="true">M</span>
+                            <div>
+                                <h3 class="responder-name">MGA Center</h3>
+                                <p class="responder-type">Emergency Hotline</p>
+                            </div>
+                        </div>
+                        <a class="responder-phone" href="tel:+639192426041">0919-242-6041</a>
+                    </section>
+
+                    <section class="responder-card">
+                        <div class="responder-heading">
+                            <span class="responder-mark" aria-hidden="true">P</span>
+                            <div>
+                                <h3 class="responder-name">PELCO II</h3>
+                                <p class="responder-type">Electric Cooperative</p>
+                            </div>
+                        </div>
+                        <a class="responder-phone" href="tel:+639190590423">0919-059-0423</a>
+                    </section>
+
+                    <section class="responder-card">
+                        <div class="responder-heading">
+                            <span class="responder-mark" aria-hidden="true">C</span>
+                            <div>
+                                <h3 class="responder-name">CDRRMO</h3>
+                                <p class="responder-type">Disaster Risk Reduction and Management</p>
+                            </div>
+                        </div>
+                        <a class="responder-phone" href="tel:+639276117634">0927-611-7634</a>
+                    </section>
+
+                    <section class="responder-card">
+                        <div class="responder-heading">
+                            <span class="responder-mark" aria-hidden="true">P</span>
+                            <div>
+                                <h3 class="responder-name">PNP</h3>
+                                <p class="responder-type">Philippine National Police</p>
+                            </div>
+                        </div>
+                        <div class="responder-numbers">
+                            <a class="responder-phone" href="tel:+639989673262">0998-967-3262</a>
+                            <a class="responder-phone" href="tel:+639485524384">0948-552-4384</a>
+                        </div>
+                    </section>
+
+                    <section class="responder-card">
+                        <div class="responder-heading">
+                            <span class="responder-mark" aria-hidden="true">B</span>
+                            <div>
+                                <h3 class="responder-name">BFP</h3>
+                                <p class="responder-type">Bureau of Fire Protection</p>
+                            </div>
+                        </div>
+                        <div class="responder-numbers">
+                            <a class="responder-phone" href="tel:+639339909960">0933-990-9960</a>
+                            <a class="responder-phone" href="tel:+639633636212">0963-363-6212</a>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
 
         <div id="historyTab" class="tab-content" style="display: none;">
             <div class="alerts-section">
-                <div class="section-title">History</div>
-                <div class="loading">
-                    Not built yet. The dashboard list above already shows resolved alerts -
-                    filter it here once you need a dedicated archive view.
+                <div class="section-title">Resolved Incidents</div>
+                <div class="alerts-grid history-grid" id="historyGrid">
+                    <div class="loading">No resolved incidents</div>
                 </div>
             </div>
         </div>

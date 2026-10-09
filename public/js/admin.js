@@ -73,21 +73,24 @@ function renderStats(stats) {
         : '—';
 }
 
-function renderAlerts(alerts) {
-    const grid = document.getElementById('alertsGrid');
-
+function renderAlertCards(alerts, grid, emptyMessage, includeActions) {
     if (!alerts.length) {
-        grid.innerHTML = '<div class="loading">No alerts yet</div>';
+        grid.innerHTML = `<div class="loading">${emptyMessage}</div>`;
         return;
     }
 
     grid.innerHTML = alerts.map(alert => {
-        const actions = (NEXT_STATUS[alert.status] || []).map(next => `
+        const actions = includeActions ? (NEXT_STATUS[alert.status] || []).map(next => `
             <button class="${BUTTON_CLASS[next]}"
                     data-alert-id="${alert.id}"
                     data-next-status="${next}">
                 ${BUTTON_LABELS[next]}
-            </button>`).join('');
+            </button>`).join('') : '';
+        const resolvedAt = alert.status === 'resolved' && alert.resolved_at ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Resolved</span>
+                        <span class="detail-value">${relativeTime(alert.resolved_at)}</span>
+                    </div>` : '';
 
         return `
             <div class="alert-card ${escapeHtml(alert.status)}">
@@ -113,10 +116,21 @@ function renderAlerts(alerts) {
                         <span class="detail-label">Sent</span>
                         <span class="detail-value">${relativeTime(alert.created_at)}</span>
                     </div>
+                    ${resolvedAt}
                 </div>
                 ${actions ? `<div class="alert-actions">${actions}</div>` : ''}
             </div>`;
     }).join('');
+}
+
+function renderAlerts(alerts) {
+    const activeAlerts = alerts.filter(alert => alert.status !== 'resolved');
+    renderAlertCards(activeAlerts, document.getElementById('alertsGrid'), 'No active incidents', true);
+}
+
+function renderHistory(alerts) {
+    const resolvedAlerts = alerts.filter(alert => alert.status === 'resolved');
+    renderAlertCards(resolvedAlerts, document.getElementById('historyGrid'), 'No resolved incidents', false);
 }
 
 function renderActivity(alerts) {
@@ -156,9 +170,10 @@ async function refresh() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const payload = await response.json();
-        populateFacilities(payload.data);
+        populateFacilities([...payload.data, ...payload.history]);
         renderStats(payload.stats);
         renderAlerts(payload.data);
+        renderHistory(payload.history);
         renderActivity(payload.data);
     } catch (error) {
         toast(`Could not reach the server: ${error.message}`, true);

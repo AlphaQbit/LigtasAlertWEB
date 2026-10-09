@@ -184,18 +184,24 @@ class RescueeAlertApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('stats.active', 2)
             ->assertJsonPath('stats.open', 2)
-            ->assertJsonCount(3, 'data');
+            ->assertJsonCount(3, 'data')
+            ->assertJsonCount(1, 'history')
+            ->assertJsonPath('history.0.status', Alert::STATUS_RESOLVED);
     }
 
     public function test_dashboard_can_filter_by_facility(): void
     {
         Alert::factory()->create(['facility' => 'MCC MAIN']);
         Alert::factory()->create(['facility' => 'Campus']);
+        Alert::factory()->resolved()->create(['facility' => 'MCC MAIN']);
+        Alert::factory()->resolved()->create(['facility' => 'Campus']);
 
         $this->actingAs(User::factory()->create())
             ->getJson('/admin/alerts?facility='.urlencode('MCC MAIN'))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.facility', 'MCC MAIN');
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.facility', 'MCC MAIN')
+            ->assertJsonCount(1, 'history')
+            ->assertJsonPath('history.0.facility', 'MCC MAIN');
     }
 }
