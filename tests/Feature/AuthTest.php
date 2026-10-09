@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Psr7\Request as HttpRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -178,5 +180,32 @@ class AuthTest extends TestCase
             ->assertSessionHasErrors('email');
 
         $this->assertGuest();
+    }
+
+    public function test_microsoft_connection_failure_shows_an_actionable_error(): void
+    {
+        $exception = new ConnectException(
+            'cURL error 60: SSL certificate problem: unable to get local issuer certificate',
+            new HttpRequest('POST', 'https://login.microsoftonline.com/token'),
+        );
+
+        Socialite::shouldReceive('driver->user')->andThrow($exception);
+
+        $this->get('/auth/microsoft/callback')
+            ->assertRedirect('/login')
+            ->assertSessionHasErrors([
+                'email' => "Microsoft sign-in could not verify Microsoft's TLS certificate. Confirm the project CA bundle is present and reload Laravel's configuration.",
+            ]);
+
+        $this->assertGuest();
+    }
+
+    public function test_microsoft_socialite_uses_the_project_ca_bundle(): void
+    {
+        $caBundle = config('services.microsoft.guzzle.verify');
+
+        $this->assertSame(base_path('certs/cacert.pem'), $caBundle);
+        $this->assertFileExists($caBundle);
+        $this->assertGreaterThan(0, filesize($caBundle));
     }
 }

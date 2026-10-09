@@ -56,3 +56,21 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## LigtasAlert authentication
+
+The web login uses the Laravel session guard. The Flutter app uses the JSON
+endpoint at `/api/auth/login`. Its default API URL is `http://localhost:8000`;
+for an Android emulator, run Flutter with
+`--dart-define=LIGTAS_API_BASE=http://10.0.2.2:8000`. For a physical phone, use
+the computer's LAN address and expose Laravel with `php artisan serve --host=0.0.0.0`.
+Use HTTPS outside local development.
+
+Microsoft sign-in requires the Azure app registration redirect URI to match
+`MICROSOFT_REDIRECT_URI` (by default, `${APP_URL}/auth/microsoft/callback`).
+Socialite verifies Microsoft's TLS certificates with the Mozilla CA bundle in
+[`certs/cacert.pem`](./certs/cacert.pem), which avoids relying on the PHP
+runtime's unconfigured system bundle. Keep that bundle updated from
+<https://curl.se/ca/cacert.pem>. Do not turn off TLS certificate verification.
+After updating the bundle, run `php artisan config:clear` and restart the
+Laravel server so it uses the current configuration.

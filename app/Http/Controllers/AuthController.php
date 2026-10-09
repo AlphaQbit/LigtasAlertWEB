@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,6 +77,16 @@ class AuthController extends Controller
     {
         try {
             $microsoftUser = Socialite::driver('microsoft')->user();
+        } catch (ConnectException $exception) {
+            report($exception);
+
+            $message = str_contains($exception->getMessage(), 'cURL error 60')
+                ? "Microsoft sign-in could not verify Microsoft's TLS certificate. Confirm the project CA bundle is present and reload Laravel's configuration."
+                : 'Laravel could not connect to Microsoft. Check the server connection and try again.';
+
+            return redirect()->route('login')->withErrors([
+                'email' => $message,
+            ]);
         } catch (Throwable $exception) {
             report($exception);
 
