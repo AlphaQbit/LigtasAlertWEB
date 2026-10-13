@@ -546,3 +546,130 @@
     width: 1rem;
     height: 1rem;
 }
+
+/* Incident Reports tab */
+.reports-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.reports-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reports-controls .form-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.report-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.report-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.report-bar-label {
+    flex: 0 0 130px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report-bar-track {
+    flex: 1;
+    height: 14px;
+    background: #eef0f3;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.report-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.report-bar-count {
+    flex: 0 0 2rem;
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.report-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.report-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.report-table th,
+.report-table td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.report-table th {
+    background: #f8f9fb;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.75rem;
+    position: sticky;
+    top: 0;
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table tr:hover td {
+    background: #fafbfc;
+}
+
+.badge-sm {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-sm.active { background: #fee2e2; color: #b91c1c; }
+.badge-sm.responding { background: #dbeafe; color: #1d4ed8; }
+.badge-sm.acknowledged { background: #fef3c7; color: #b45309; }
+.badge-sm.resolved { background: #dcfce7; color: #15803d; }

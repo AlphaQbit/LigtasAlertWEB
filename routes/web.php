@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -23,5 +24,13 @@ Route::get('/admin/alerts', [AlertController::class, 'index'])
 Route::patch('/admin/alerts/{alert}/status', [AlertController::class, 'updateStatus'])
     ->middleware('auth')
     ->name('alerts.status');
+
+// Read-only incident reports and CSV export.
+Route::get('/admin/reports', [ReportController::class, 'index'])
+    ->middleware('auth')
+    ->name('reports.index');
+Route::get('/admin/reports/csv', [ReportController::class, 'csv'])
+    ->middleware('auth')
+    ->name('reports.csv');
 
 Route::redirect('/', '/login');

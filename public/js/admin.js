@@ -214,6 +214,10 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(content => {
         content.style.display = content.id === `${tabName}Tab` ? 'block' : 'none';
     });
+
+    if (tabName === 'reports') {
+        loadReports();
+    }
 }
 
 function populateFacilities(alerts) {
@@ -253,8 +257,171 @@ function init() {
 
     document.getElementById('facility')?.addEventListener('change', refresh);
 
+    const reportRefresh = document.getElementById('reportRefresh');
+    if (reportRefresh) {
+        reportRefresh.addEventListener('click', loadReports);
+    }
+    ['reportFrom', 'reportTo', 'reportFacility'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', loadReports);
+    });
+
     refresh();
     setInterval(refresh, POLL_MS);
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* ---------------------------------------------------------------------------
+ * Incident Reports tab. Polls /admin/reports with the same session cookie as
+ * the dashboard, so every number is real - no denormalized copies, no sample
+ * data. The CSV link is a plain GET to /admin/reports/csv, which returns the
+ * rows the browser already has permission to see.
+ * ------------------------------------------------------------------------- */
+async function loadReports() {
+    const params = new URLSearchParams();
+    const from = document.getElementById('reportFrom').value;
+    const to = document.getElementById('reportTo').value;
+    const facility = document.getElementById('reportFacility').value;
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (facility) params.set('facility', facility);
+
+    const csvLink = document.getElementById('reportCsv');
+    csvLink.href = `/admin/reports/csv?${params.toString()}`;
+
+    let payload;
+    try {
+        const response = await fetch(`/admin/reports?${params.toString()}`, {
+            headers: { Accept: 'application/json' },
+        });
+        if (response.status === 401) {
+            window.location = '/login';
+            return;
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        payload = await response.json();
+    } catch (error) {
+        toast(`Could not load reports: ${error.message}`, true);
+        return;
+    }
+
+    renderReportStats(payload.summary);
+    renderReportBars('reportByStatus', payload.by_status, 'status');
+    renderReportBars('reportByType', payload.by_type, 'type');
+    renderReportBars('reportByFacility', payload.by_facility, 'facility');
+    renderReportResponseTimes(payload.response_times);
+    renderReportRecent(payload.recent);
+
+    populateReportFacilities(payload.by_facility);
+}
+
+function renderReportStats(summary) {
+    const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value ?? '-';
+    };
+    set('reportTotal', summary.total);
+    set('reportActive', summary.active);
+    set('reportOpen', summary.open);
+    set('reportAvg', summary.avg != null ? `${summary.avg}s` : '-');
+}
+
+function renderReportBars(containerId, rows, labelKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!rows.length) {
+        container.innerHTML = '<div class="loading">No data in this range</div>';
+        return;
+    }
+
+    const max = Math.max(...rows.map(r => r.count), 1);
+    container.innerHTML = rows.map(row => {
+        const pct = Math.max(4, (row.count / max) * 100);
+        return `
+            <div class="report-bar-row">
+                <span class="report-bar-label" title="${escapeHtml(row.key)}">${escapeHtml(row.key)}</span>
+                <span class="report-bar-track"><span class="report-bar-fill" style="width:${pct}%"></span></span>
+                <span class="report-bar-count">${row.count}</span>
+            </div>`;
+    }).join('');
+}
+
+function renderReportResponseTimes(times) {
+    const container = document.getElementById('reportResponseTimes');
+    if (!container) return;
+
+    if (times.count === 0) {
+        container.innerHTML = '<div class="loading">No acknowledged incidents yet</div>';
+        return;
+    }
+
+    const rows = [
+        { key: 'min', count: times.min },
+        { key: 'avg', count: times.avg },
+        { key: 'max', count: times.max },
+    ];
+    renderReportBars('reportResponseTimes', rows, 'key');
+}
+
+function renderReportRecent(alerts) {
+    const container = document.getElementById('reportRecent');
+    if (!container) return;
+
+    if (!alerts.length) {
+        container.innerHTML = '<div class="loading">No incidents in this range</div>';
+        return;
+    }
+
+    const statusClass = (status) => ({
+        active: 'active', responding: 'responding',
+        acknowledged: 'acknowledged', resolved: 'resolved',
+    }[status] || '');
+
+    container.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Facility</th><th>Type</th><th>Location</th>
+                    <th>Status</th><th>Acknowledged</th><th>Resolved</th>
+                    <th>Response</th><th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${alerts.map(a => `
+                    <tr>
+                        <td>${a.id}</td>
+                        <td>${escapeHtml(a.facility)}</td>
+                        <td>${escapeHtml(a.type)}</td>
+                        <td>${escapeHtml(a.location)}</td>
+                        <td><span class="badge-sm ${statusClass(a.status)}">${escapeHtml(a.status)}</span></td>
+                        <td>${a.acknowledged_at ? formatIso(a.acknowledged_at) : '-'}</td>
+                        <td>${a.resolved_at ? formatIso(a.resolved_at) : '-'}</td>
+                        <td>${a.response_seconds != null ? `${a.response_seconds}s` : '-'}</td>
+                        <td>${formatIso(a.created_at)}</td>
+                    </tr>`).join('')}
+            </tbody>
+        </table>`;
+}
+
+function populateReportFacilities(byFacility) {
+    const select = document.getElementById('reportFacility');
+    if (!select) return;
+
+    const current = select.value;
+    select.innerHTML = '<option value="">All facilities</option>';
+    [...new Set(byFacility.map(f => f.key))].sort().forEach(facility => {
+        const option = document.createElement('option');
+        option.value = facility;
+        option.textContent = facility;
+        select.appendChild(option);
+    });
+    if (current && current !== '') select.value = current;
+}
+
+function formatIso(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? iso : d.toLocaleString();
+}

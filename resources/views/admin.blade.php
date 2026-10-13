@@ -27,6 +27,7 @@
                 <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
                 <button class="nav-tab" data-tab="contacts">Contacts</button>
                 <button class="nav-tab" data-tab="history">History</button>
+                <button class="nav-tab" data-tab="reports">Reports</button>
             </div>
         </div>
     </div>
@@ -143,6 +144,54 @@
                 <div class="section-title">Resolved Incidents</div>
                 <div class="alerts-grid history-grid" id="historyGrid">
                     <div class="loading">No resolved incidents</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportsTab" class="tab-content" style="display: none;">
+            <div class="reports-header">
+                <div class="section-title">Incident Reports</div>
+                <div class="reports-controls">
+                    <input type="date" id="reportFrom" class="form-input" style="max-width:14rem;">
+                    <input type="date" id="reportTo" class="form-input" style="max-width:14rem;">
+                    <select id="reportFacility" class="form-input" style="max-width:16rem;">
+                        <option value="">All facilities</option>
+                    </select>
+                    <button class="btn-primary" id="reportRefresh" style="width:auto;padding:0.65rem 1.25rem;">Refresh</button>
+                    <a class="btn-logout" id="reportCsv" href="#" style="text-decoration:none;">Export CSV</a>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="reportStats">
+                <div class="stat-card"><div class="stat-number" id="reportTotal">-</div><div class="stat-label">Total Incidents</div></div>
+                <div class="stat-card active"><div class="stat-number" id="reportActive">-</div><div class="stat-label">Active</div></div>
+                <div class="stat-card standby"><div class="stat-number" id="reportOpen">-</div><div class="stat-label">Open</div></div>
+                <div class="stat-card"><div class="stat-number" id="reportAvg">-</div><div class="stat-label">Avg Response</div></div>
+            </div>
+
+            <div class="reports-grid">
+                <div class="alerts-section">
+                    <div class="section-title">By Status</div>
+                    <div class="report-bars" id="reportByStatus"></div>
+                </div>
+                <div class="alerts-section">
+                    <div class="section-title">By Emergency Type</div>
+                    <div class="report-bars" id="reportByType"></div>
+                </div>
+                <div class="alerts-section">
+                    <div class="section-title">By Facility</div>
+                    <div class="report-bars" id="reportByFacility"></div>
+                </div>
+                <div class="alerts-section">
+                    <div class="section-title">Response Time (seconds)</div>
+                    <div class="report-bars" id="reportResponseTimes"></div>
+                </div>
+            </div>
+
+            <div class="alerts-section">
+                <div class="section-title">Recent Incidents</div>
+                <div class="report-table" id="reportRecent">
+                    <div class="loading">No data</div>
                 </div>
             </div>
         </div>
