@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         // The rescuee app is served from another origin (a Flutter dev server
         // or a device), so the browser has to be allowed to call the alert API.
         // Alerts carry no credentials, so a wildcard origin is safe here.
