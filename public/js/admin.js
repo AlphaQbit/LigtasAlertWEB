@@ -218,7 +218,13 @@ function switchTab(tabName) {
 
 function populateFacilities(alerts) {
     const select = document.getElementById('facility');
-    if (!select || select.dataset.populated) return;
+    if (!select) return;
+
+    // Rebuild every refresh instead of guarding with a flag. The first poll
+    // only knows about alerts that existed when the page loaded; a building
+    // added later never appears until a hard refresh clears the guard.
+    const current = select.value;
+    select.innerHTML = '<option value="all">All Facilities</option>';
 
     [...new Set(alerts.map(alert => alert.facility))].sort().forEach(facility => {
         const option = document.createElement('option');
@@ -227,7 +233,9 @@ function populateFacilities(alerts) {
         select.appendChild(option);
     });
 
-    select.dataset.populated = 'true';
+    if (current && current !== 'all') {
+        select.value = current;
+    }
 }
 
 function init() {

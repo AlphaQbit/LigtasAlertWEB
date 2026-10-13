@@ -7,12 +7,13 @@ use App\Http\Requests\StoreAlertRequest;
 use App\Http\Resources\AlertResource;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AlertController extends Controller
 {
     /**
-     * Receive an alert from the rescuee app. Unauthenticated on purpose - see
-     * StoreAlertRequest::authorize().
+     * Receive an alert from the rescuee app. Authenticated so the alert is tied
+     * to the rescuee's account (see StoreAlertRequest::authorize()).
      */
     public function store(StoreAlertRequest $request): JsonResponse
     {
@@ -25,9 +26,34 @@ class AlertController extends Controller
 
     /**
      * The rescuee app polls this to learn its alert's current status.
+     * Rescuees can only read their own alerts.
      */
-    public function show(Alert $alert): AlertResource
+    public function show(Request $request, Alert $alert): AlertResource
     {
+        $requestUser = $request->user();
+        $authHeader = $request->header('Authorization');
+        $cookies = $request->cookies->all();
+        $sessionId = null;
+        try {
+            $sessionId = $request->session()->getId();
+        } catch (\RuntimeException) {
+            // No session on API routes
+        }
+
+        \Log::info('Alert show check', [
+            'alert_user_id' => $alert->user_id,
+            'request_user_id' => $requestUser?->id,
+            'alert_id' => $alert->id,
+            'has_auth_header' => !empty($authHeader),
+            'auth_header_preview' => $authHeader ? substr($authHeader, 0, 20) : null,
+            'session_id' => $sessionId,
+            'cookies' => array_keys($cookies),
+        ]);
+
+        if ($alert->user_id !== $requestUser->id) {
+            abort(403, 'This alert belongs to another rescuee.');
+        }
+
         return AlertResource::make($alert);
     }
 }

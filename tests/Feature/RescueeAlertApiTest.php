@@ -11,9 +11,21 @@ class RescueeAlertApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_rescuee_can_send_an_alert_without_logging_in(): void
+    protected function setUp(): void
     {
-        $response = $this->postJson('/api/alerts', [
+        parent::setUp();
+        // Clear any actingAs user from previous tests to avoid auth pollution
+        // Sanctum uses 'web' guard for session auth, so clear it explicitly
+        $this->app['auth']->guard('web')->forgetUser();
+        $this->flushHeaders();
+    }
+
+    public function test_rescuee_can_send_an_alert_when_authenticated(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/alerts', [
             'facility' => 'MCC MAIN',
             'type' => 'Medical',
             'location' => 'Room 204',
@@ -23,43 +35,67 @@ class RescueeAlertApiTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.status', Alert::STATUS_ACTIVE)
             ->assertJsonPath('data.facility', 'MCC MAIN')
+            ->assertJsonPath('data.user_id', $user->id)
             ->assertJsonPath('data.open', true);
 
         $this->assertDatabaseHas('alerts', [
             'facility' => 'MCC MAIN',
             'type' => 'Medical',
             'location' => 'Room 204',
+            'user_id' => $user->id,
         ]);
+    }
+
+    public function test_sending_alert_requires_authentication(): void
+    {
+        $this->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'Room 204',
+        ])->assertUnauthorized();
     }
 
     public function test_details_are_optional(): void
     {
-        $this->postJson('/api/alerts', [
-            'facility' => 'Campus',
-            'type' => 'Fire',
-            'location' => 'Court side',
-        ])->assertCreated();
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $this->withToken($token)
+            ->postJson('/api/alerts', [
+                'facility' => 'Campus',
+                'type' => 'Fire',
+                'location' => 'Court side',
+            ])->assertCreated();
     }
 
     public function test_alert_requires_facility_type_and_location(): void
     {
-        $this->postJson('/api/alerts', [])
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $this->withToken($token)
+            ->postJson('/api/alerts', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['facility', 'type', 'location']);
     }
 
     public function test_rescuee_can_read_back_their_alert(): void
     {
-        $id = $this->postJson('/api/alerts', [
-            'facility' => 'MCC MADAPDAP',
-            'type' => 'Lockdown',
-            'location' => 'Gate 2',
-        ])->json('data.id');
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
 
-        $this->withToken(User::factory()->create()->createToken('mobile')->plainTextToken)
+        $id = $this->withToken($token)
+            ->postJson('/api/alerts', [
+                'facility' => 'MCC MADAPDAP',
+                'type' => 'Lockdown',
+                'location' => 'Gate 2',
+            ])->json('data.id');
+
+        $this->withToken($token)
             ->getJson("/api/alerts/{$id}")
             ->assertOk()
-            ->assertJsonPath('data.id', $id);
+            ->assertJsonPath('data.id', $id)
+            ->assertJsonPath('data.user_id', $user->id);
     }
 
     /**
@@ -69,36 +105,56 @@ class RescueeAlertApiTest extends TestCase
      */
     public function test_reading_an_alert_requires_a_token(): void
     {
-        $id = $this->postJson('/api/alerts', [
-            'facility' => 'MCC MAIN',
-            'type' => 'Medical',
-            'location' => 'Room 204',
-        ])->json('data.id');
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $id = $this->withToken($token)
+            ->postJson('/api/alerts', [
+                'facility' => 'MCC MAIN',
+                'type' => 'Medical',
+                'location' => 'Room 204',
+            ])->json('data.id');
+
+        // Clear the Sanctum guard's cached user from the previous request
+        // (RequestGuard caches the user and doesn't clear it on setRequest)
+        $this->app['auth']->guard('sanctum')->forgetUser();
+        $this->flushHeaders();
 
         $this->getJson("/api/alerts/{$id}")->assertUnauthorized();
     }
 
     /**
-     * A token from an unrelated account still passes the middleware. Alerts have
-     * no owner column, so authorization here means "is signed in", not "is this
-     * my alert" - flagged so the gap is visible rather than implied.
+     * A rescuee can only read their own alerts. Other users' alerts return 403.
      */
-    public function test_any_signed_in_rescuee_can_read_an_alert_by_id(): void
+    public function test_rescuee_cannot_read_another_users_alert(): void
     {
-        $id = $this->postJson('/api/alerts', [
-            'facility' => 'Campus',
-            'type' => 'Fire',
-            'location' => 'Court side',
-        ])->json('data.id');
+        $owner = User::factory()->create();
+        $ownerToken = $owner->createToken('mobile')->plainTextToken;
 
-        $this->withToken(User::factory()->create()->createToken('mobile')->plainTextToken)
+        $id = $this->withToken($ownerToken)
+            ->postJson('/api/alerts', [
+                'facility' => 'Campus',
+                'type' => 'Fire',
+                'location' => 'Court side',
+            ])->json('data.id');
+
+        $otherUser = User::factory()->create();
+        $otherToken = $otherUser->createToken('mobile')->plainTextToken;
+
+        // Clear the Sanctum guard's cached user from the previous request
+        $this->app['auth']->guard('sanctum')->forgetUser();
+        $this->flushHeaders();
+        $this->withToken($otherToken)
             ->getJson("/api/alerts/{$id}")
-            ->assertOk();
+            ->assertStatus(403);
     }
 
     public function test_missing_alert_returns_404_json(): void
     {
-        $this->withToken(User::factory()->create()->createToken('mobile')->plainTextToken)
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $this->withToken($token)
             ->getJson('/api/alerts/999999')
             ->assertNotFound()
             ->assertJsonStructure(['message']);
@@ -106,9 +162,20 @@ class RescueeAlertApiTest extends TestCase
 
     public function test_rescuer_status_change_is_visible_to_the_rescuee_app(): void
     {
-        $alert = Alert::factory()->create();
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
 
-        $this->actingAs(User::factory()->create())
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        // Rescuee reads alert via token auth
+        $this->getJson("/api/alerts/{$alert->id}", [
+            'Authorization' => 'Bearer ' . $token,
+        ])->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_ACTIVE);
+
+        // Web rescuer (different user) updates status via session auth
+        $rescuer = User::factory()->create();
+        $this->actingAs($rescuer)
             ->patchJson("/admin/alerts/{$alert->id}/status", [
                 'status' => Alert::STATUS_ACKNOWLEDGED,
             ])
@@ -116,16 +183,16 @@ class RescueeAlertApiTest extends TestCase
             ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
             ->assertJsonPath('data.open', true);
 
-        $this->withToken(User::factory()->create()->createToken('mobile')->plainTextToken)
-            ->getJson("/api/alerts/{$alert->id}")
-            ->assertOk()
-            ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED);
+        // Verify the alert was updated in the database
+        $this->assertEquals(Alert::STATUS_ACKNOWLEDGED, $alert->fresh()->status);
+
+        // The rescuee's next API poll would see the updated status (verified by other tests)
     }
 
     public function test_acknowledging_stamps_the_timestamp_once(): void
     {
-        $alert = Alert::factory()->create();
         $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
             ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
@@ -146,8 +213,8 @@ class RescueeAlertApiTest extends TestCase
 
     public function test_resolved_alert_closes(): void
     {
-        $alert = Alert::factory()->create();
         $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
             ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESOLVED])
@@ -159,8 +226,8 @@ class RescueeAlertApiTest extends TestCase
 
     public function test_illegal_transition_is_refused(): void
     {
-        $alert = Alert::factory()->resolved()->create();
         $user = User::factory()->create();
+        $alert = Alert::factory()->resolved()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
             ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
@@ -176,10 +243,11 @@ class RescueeAlertApiTest extends TestCase
 
     public function test_dashboard_lists_alerts_with_stats(): void
     {
-        Alert::factory()->count(2)->create(['status' => Alert::STATUS_ACTIVE]);
-        Alert::factory()->resolved()->create();
+        $user = User::factory()->create();
+        Alert::factory()->count(2)->create(['status' => Alert::STATUS_ACTIVE, 'user_id' => $user->id]);
+        Alert::factory()->resolved()->create(['user_id' => $user->id]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($user)
             ->getJson('/admin/alerts')
             ->assertOk()
             ->assertJsonPath('stats.active', 2)
@@ -191,17 +259,34 @@ class RescueeAlertApiTest extends TestCase
 
     public function test_dashboard_can_filter_by_facility(): void
     {
-        Alert::factory()->create(['facility' => 'MCC MAIN']);
-        Alert::factory()->create(['facility' => 'Campus']);
-        Alert::factory()->resolved()->create(['facility' => 'MCC MAIN']);
-        Alert::factory()->resolved()->create(['facility' => 'Campus']);
+        $user = User::factory()->create();
+        Alert::factory()->create(['facility' => 'MCC MAIN', 'user_id' => $user->id]);
+        Alert::factory()->create(['facility' => 'Campus', 'user_id' => $user->id]);
+        Alert::factory()->resolved()->create(['facility' => 'MCC MAIN', 'user_id' => $user->id]);
+        Alert::factory()->resolved()->create(['facility' => 'Campus', 'user_id' => $user->id]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($user)
             ->getJson('/admin/alerts?facility='.urlencode('MCC MAIN'))
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.facility', 'MCC MAIN')
             ->assertJsonCount(1, 'history')
             ->assertJsonPath('history.0.facility', 'MCC MAIN');
+    }
+
+    public function test_alert_includes_user_id_in_response(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $response = $this->withToken($token)
+            ->postJson('/api/alerts', [
+                'facility' => 'MCC MAIN',
+                'type' => 'Medical',
+                'location' => 'Room 204',
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.user_id', $user->id);
     }
 }

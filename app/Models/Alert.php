@@ -8,13 +8,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['facility', 'type', 'location', 'details', 'status'])]
+#[Fillable(['user_id', 'facility', 'type', 'location', 'details', 'status'])]
 class Alert extends Model
 {
     /** @use HasFactory<AlertFactory> */
     use HasFactory;
 
     const STATUS_ACTIVE = 'active';
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     const STATUS_RESPONDING = 'responding';
 

@@ -8,12 +8,12 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreAlertRequest extends FormRequest
 {
     /**
-     * Anyone can send an emergency alert - requiring a login would mean a
-     * rescuee in trouble cannot call for help.
+     * The alert sender must be authenticated so the alert is tied to their account.
+     * This prevents anonymous alerts and ensures ownership for status reading.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     /**
@@ -27,5 +27,19 @@ class StoreAlertRequest extends FormRequest
             'location' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string', 'max:2000'],
         ];
+    }
+
+    /**
+     * Merge the authenticated user's ID into the validated data.
+     */
+    public function validated($key = null, $default = null): array
+    {
+        $validated = parent::validated($key, $default);
+
+        if ($key === null) {
+            $validated['user_id'] = $this->user()->id;
+        }
+
+        return $validated;
     }
 }

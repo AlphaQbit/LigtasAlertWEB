@@ -5,14 +5,10 @@ use App\Http\Controllers\Api\AuthController as MobileAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Rescuee app. Sending stays unauthenticated on purpose: a rescuee in trouble
-// must never be blocked from calling for help by a login.
-//
-// Reading is gated. An alert carries a facility and a room number, so leaving
-// this open let anyone who guessed an id read someone else's emergency. The
-// app only reaches this route after logging in, so requiring a token costs a
-// logged-in rescuee nothing.
-Route::post('/alerts', [MobileAlertController::class, 'store']);
+// Rescuee app. Sending requires authentication so every alert is tied to a
+// rescuee account. This ensures ownership for status reading and prevents abuse.
+Route::post('/alerts', [MobileAlertController::class, 'store'])
+    ->middleware('auth:sanctum');
 Route::get('/alerts/{alert}', [MobileAlertController::class, 'show'])
     ->middleware('auth:sanctum')
     ->whereNumber('alert');

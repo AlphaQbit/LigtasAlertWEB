@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Alert;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'facility' => fake()->randomElement(['Main Hospital', 'North Annex', 'Clinic A']),
             'type' => fake()->randomElement(['Cardiac Arrest', 'Fall', 'Fire Alarm', 'Security Breach']),
             'location' => 'Room '.fake()->numberBetween(1, 300),
