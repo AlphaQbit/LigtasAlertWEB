@@ -149,6 +149,32 @@ class RescueeAlertApiTest extends TestCase
             ->assertStatus(403);
     }
 
+    /**
+     * Regression: AlertController::show() used to log a truncated Authorization
+     * header. A bearer token is credential material and must never reach the
+     * application log, so a status poll must not write it there.
+     */
+    public function test_alert_show_does_not_log_the_bearer_token(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $logPath = storage_path('logs/laravel.log');
+        $before = is_file($logPath) ? file_get_contents($logPath) : '';
+
+        $this->withToken($token)
+            ->getJson("/api/alerts/{$alert->id}")
+            ->assertOk();
+
+        $after = is_file($logPath) ? file_get_contents($logPath) : '';
+        $newLines = substr($after, strlen($before));
+
+        $this->assertNotSame('', $newLines, 'Expected the request to log an entry.');
+        $this->assertStringNotContainsString($token, $newLines);
+        $this->assertStringNotContainsString('Bearer', $newLines);
+    }
+
     public function test_missing_alert_returns_404_json(): void
     {
         $user = User::factory()->create();
@@ -241,6 +267,23 @@ class RescueeAlertApiTest extends TestCase
         $this->getJson('/admin/alerts')->assertUnauthorized();
     }
 
+    /**
+     * The status-update endpoint sits behind the same session auth as the
+     * dashboard list. An unauthenticated request must be refused before the
+     * route binding or controller ever runs, so no guest can acknowledge or
+     * resolve an incident.
+     */
+    public function test_status_update_requires_login(): void
+    {
+        $alert = Alert::factory()->create();
+
+        $this->patchJson("/admin/alerts/{$alert->id}/status", [
+            'status' => Alert::STATUS_ACKNOWLEDGED,
+        ])->assertUnauthorized();
+
+        $this->assertSame(Alert::STATUS_ACTIVE, $alert->fresh()->status);
+    }
+
     public function test_dashboard_lists_alerts_with_stats(): void
     {
         $user = User::factory()->create();
@@ -272,6 +315,33 @@ class RescueeAlertApiTest extends TestCase
             ->assertJsonPath('data.0.facility', 'MCC MAIN')
             ->assertJsonCount(1, 'history')
             ->assertJsonPath('history.0.facility', 'MCC MAIN');
+    }
+
+    /**
+     * The rescuee app marks an unknown exact room by sending the facility
+     * label plus a parenthetical into the existing location field. The backend
+     * must accept it as a plain string and return it byte-for-byte, so a
+     * rescuer never sees the room collapsed away or reinterpreted.
+     */
+    public function test_unknown_room_location_round_trips_unchanged(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'MCC MAIN (exact room not provided)',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.facility', 'MCC MAIN')
+            ->assertJsonPath('data.location', 'MCC MAIN (exact room not provided)');
+
+        $this->assertDatabaseHas('alerts', [
+            'facility' => 'MCC MAIN',
+            'location' => 'MCC MAIN (exact room not provided)',
+        ]);
     }
 
     public function test_alert_includes_user_id_in_response(): void

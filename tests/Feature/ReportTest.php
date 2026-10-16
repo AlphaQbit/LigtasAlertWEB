@@ -118,4 +118,26 @@ class ReportTest extends TestCase
             ->assertSee('MCC MAIN')
             ->assertSee('Lockdown');
     }
+
+    public function test_reports_preserve_unknown_room_location_in_recent_and_csv(): void
+    {
+        $user = User::factory()->create();
+        $unknown = 'MCC MAIN (exact room not provided)';
+        Alert::factory()->create([
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => $unknown,
+            'user_id' => $user->id,
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/admin/reports')
+            ->assertOk()
+            ->assertJsonPath('recent.0.location', $unknown);
+
+        $this->actingAs($user)
+            ->get('/admin/reports/csv')
+            ->assertOk()
+            ->assertSee($unknown);
+    }
 }
