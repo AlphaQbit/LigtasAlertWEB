@@ -673,3 +673,677 @@
 .badge-sm.responding { background: #dbeafe; color: #1d4ed8; }
 .badge-sm.acknowledged { background: #fef3c7; color: #b45309; }
 .badge-sm.resolved { background: #dcfce7; color: #15803d; }
+
+/* Contacts tab */
+#contactsTab {
+    min-width: 0;
+    gap: 1.5rem;
+}
+
+#contactsTab .contacts-icon-library {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+#contactsTab svg:not(.contacts-icon-library) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#contactsTab > .alerts-section {
+    gap: 1.25rem;
+}
+
+#contactsTab .contacts-header,
+#contactsTab .guidelines-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#contactsTab .contacts-filter:focus-visible {
+    border-color: var(--info);
+    outline: 3px solid rgba(59, 130, 246, 0.15);
+}
+
+#contactsTab .contacts-controls {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+#contactsTab .contacts-category-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+#contactsTab .contacts-filter {
+    min-height: 2.5rem;
+    max-width: 10rem;
+    padding: 0.5rem 1.75rem 0.5rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+#contactsTab .responder-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+#contactsTab .responder-card {
+    grid-template-rows: auto auto 1fr;
+    gap: 0.875rem;
+    min-width: 0;
+    padding: 1.25rem;
+    border-radius: 18px;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+#contactsTab .responder-card:hover {
+    transform: translateY(-3px);
+    border-color: #CBD5E1;
+    box-shadow: 0 12px 22px -10px rgba(31, 41, 55, 0.24);
+}
+
+#contactsTab .responder-heading {
+    min-width: 0;
+}
+
+#contactsTab .responder-info {
+    min-width: 0;
+}
+
+#contactsTab .responder-type {
+    overflow-wrap: anywhere;
+}
+
+#contactsTab .responder-mark {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 16px;
+}
+
+#contactsTab .responder-mark svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke-width: 2.2;
+}
+
+#contactsTab .responder-mark-medical {
+    color: #0284C7;
+    background: #E0F2FE;
+}
+
+#contactsTab .responder-mark-utility {
+    color: #A16207;
+    background: #FEF9C3;
+}
+
+#contactsTab .responder-mark-disaster {
+    color: #7C3AED;
+    background: #EDE9FE;
+}
+
+#contactsTab .responder-mark-security {
+    color: #1D4ED8;
+    background: #DBEAFE;
+}
+
+#contactsTab .responder-mark-fire {
+    color: #DC2626;
+    background: #FEE2E2;
+}
+
+#contactsTab .availability-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 0.45rem;
+    padding: 0.3rem 0.625rem;
+    border-radius: 999px;
+    background: var(--ok-bg);
+    color: var(--ok-text);
+    font-size: 0.75rem;
+    font-weight: 750;
+}
+
+#contactsTab .availability-badge > span {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--ok-dot);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+#contactsTab .responder-numbers {
+    align-content: end;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+#contactsTab .responder-number-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+#contactsTab .responder-phone {
+    display: flex;
+    align-items: center;
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding: 0.625rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+#contactsTab .contact-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 750;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+#contactsTab .contact-action svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    flex: 0 0 auto;
+}
+
+#contactsTab .contact-action:active {
+    transform: scale(0.96);
+}
+
+#contactsTab .contact-call {
+    border-color: #BBF7D0;
+    background: #F0FDF4;
+    color: #15803D;
+}
+
+#contactsTab .contact-copy:hover,
+#contactsTab .contact-copy:focus-visible {
+    border-color: #BFDBFE;
+    background: #EFF6FF;
+    color: #1D4ED8;
+}
+
+#contactsTab .contacts-empty {
+    padding: 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+#contactsTab .contacts-empty[hidden],
+#contactsTab .responder-card[hidden] {
+    display: none;
+}
+
+#contactsTab .guidelines-section {
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+    box-shadow: 0 4px 12px -6px rgba(31, 41, 55, 0.18);
+}
+
+#contactsTab .guidelines-heading .section-title {
+    margin-bottom: 0.25rem;
+}
+
+#contactsTab .guidelines-heading .section-title svg,
+#contactsTab .guidelines-note svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--primary);
+}
+
+#contactsTab .guidelines-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 0 auto;
+    padding: 0.5rem 0.75rem;
+    border-radius: 999px;
+    background: #FFF7ED;
+    color: #9A3412;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+#contactsTab .guidelines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    gap: 0.875rem;
+}
+
+#contactsTab .guideline-card {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 2px 6px rgba(31, 41, 55, 0.04);
+}
+
+#contactsTab .guideline-card[open] {
+    border-color: #CBD5E1;
+    box-shadow: 0 8px 18px -12px rgba(31, 41, 55, 0.28);
+}
+
+#contactsTab .guideline-card summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 5.25rem;
+    padding: 1rem;
+    list-style: none;
+    cursor: pointer;
+}
+
+#contactsTab .guideline-card summary::-webkit-details-marker {
+    display: none;
+}
+
+#contactsTab .guideline-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 14px;
+}
+
+#contactsTab .guideline-icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+#contactsTab .guideline-fire {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+#contactsTab .guideline-utility {
+    background: #FEF9C3;
+    color: #A16207;
+}
+
+#contactsTab .guideline-medical {
+    background: #E0F2FE;
+    color: #0284C7;
+}
+
+#contactsTab .guideline-security {
+    background: #DBEAFE;
+    color: #1D4ED8;
+}
+
+#contactsTab .guideline-disaster {
+    background: #EDE9FE;
+    color: #7C3AED;
+}
+
+#contactsTab .guideline-title {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 800;
+}
+
+#contactsTab .guideline-title small {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 650;
+}
+
+#contactsTab .guideline-chevron {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 auto;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+
+#contactsTab .guideline-card[open] .guideline-chevron {
+    transform: rotate(180deg);
+}
+
+#contactsTab .guideline-card summary:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, 0.35);
+    outline-offset: -3px;
+    border-radius: 16px;
+}
+
+#contactsTab .guideline-content {
+    padding: 0 1rem 1rem 4.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+#contactsTab .guideline-content ol {
+    display: grid;
+    gap: 0.625rem;
+    padding-left: 1rem;
+}
+
+#contactsTab .guideline-content li::marker {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+#contactsTab .contacts-admin-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 4px 12px -6px rgba(31, 41, 55, 0.16);
+}
+
+#contactsTab .contacts-admin-actions h2 {
+    font-size: 1rem;
+}
+
+#contactsTab .contacts-admin-actions p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+#contactsTab .contacts-admin-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+#contactsTab .contacts-primary-button,
+#contactsTab .contacts-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+#contactsTab .contacts-primary-button {
+    background: var(--primary);
+    color: #FFFFFF;
+}
+
+#contactsTab .contacts-primary-button:hover {
+    background: var(--primary-hover);
+}
+
+#contactsTab .contacts-secondary-button {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+#contactsTab .contacts-secondary-button:hover {
+    border-color: #FCA5A5;
+    background: #FEF2F2;
+    color: var(--primary-hover);
+}
+
+#contactsTab .contacts-primary-button:active,
+#contactsTab .contacts-secondary-button:active {
+    transform: scale(0.98);
+}
+
+#contactsTab .contacts-primary-button svg,
+#contactsTab .contacts-secondary-button svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+#contactsTab .contacts-demo-note {
+    grid-column: 1 / -1;
+    margin-top: -0.5rem;
+    font-size: 0.75rem;
+}
+
+#contactsTab .contacts-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(100% - 2rem, 32rem);
+    max-width: 32rem;
+    max-height: min(90vh, 46rem);
+    margin: auto;
+    padding: 1.5rem;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+#contactsTab .contacts-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+#contactsTab .contacts-dialog-close-form {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#contactsTab .contacts-dialog-close {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+#contactsTab .contacts-dialog-close svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+#contactsTab .contacts-dialog-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 0.25rem 0 1.25rem;
+}
+
+#contactsTab .contacts-dialog-heading h2 {
+    font-size: 1.1rem;
+}
+
+#contactsTab .contacts-dialog-heading p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+#contactsTab .contacts-dialog-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 14px;
+    background: #FEF2F2;
+    color: var(--primary);
+}
+
+#contactsTab .contacts-dialog-icon svg {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+#contactsTab .contacts-dialog-form {
+    display: grid;
+    gap: 0.625rem;
+}
+
+#contactsTab .contacts-dialog-form label {
+    margin-top: 0.375rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+#contactsTab .contacts-dialog-form input,
+#contactsTab .contacts-dialog-form select,
+#contactsTab .contacts-dialog-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+#contactsTab .contacts-dialog-form textarea {
+    resize: vertical;
+}
+
+#contactsTab .contacts-dialog-form input:focus-visible,
+#contactsTab .contacts-dialog-form select:focus-visible,
+#contactsTab .contacts-dialog-form textarea:focus-visible,
+#contactsTab .contacts-dialog-close:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, 0.2);
+    border-color: var(--info);
+}
+
+#contactsTab .contacts-dialog-notice {
+    margin: 0.25rem 0;
+    padding: 0.75rem;
+    border-radius: 10px;
+    background: #FFF7ED;
+    color: #9A3412;
+    font-size: 0.8rem;
+}
+
+#contactsTab .contacts-dialog-form .contacts-primary-button {
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    #contactsTab .contacts-header,
+    #contactsTab .guidelines-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #contactsTab .contacts-controls {
+        width: 100%;
+    }
+
+    #contactsTab .guidelines-note {
+        align-self: flex-start;
+    }
+
+    #contactsTab .contacts-admin-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #contactsTab .contacts-admin-buttons {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #contactsTab .responder-grid,
+    #contactsTab .guidelines-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #contactsTab .contacts-category-field {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    #contactsTab .contacts-filter {
+        flex: 1;
+        max-width: none;
+    }
+
+    #contactsTab .responder-card {
+        padding: 1rem;
+    }
+
+    #contactsTab .contact-action {
+        gap: 0.2rem;
+        padding-right: 0.4rem;
+        padding-left: 0.4rem;
+        font-size: 0.68rem;
+    }
+
+    #contactsTab .guidelines-section {
+        padding: 1rem;
+    }
+
+    #contactsTab .guideline-content {
+        padding-left: 1.25rem;
+    }
+
+    #contactsTab .contacts-admin-buttons {
+        flex-direction: column;
+    }
+
+    #contactsTab .contacts-admin-buttons button {
+        width: 100%;
+    }
+
+    #contactsTab .contacts-dialog {
+        padding: 1.125rem;
+    }
+}

@@ -62,6 +62,74 @@ function toast(message, isError = false) {
     setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
+function filterContacts() {
+    const category = document.getElementById('contactCategory');
+    const cards = [...document.querySelectorAll('#responderGrid .responder-card')];
+    const selectedCategory = category?.value ?? 'all';
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const matchesCategory = selectedCategory === 'all' || card.dataset.category === selectedCategory;
+        card.hidden = !matchesCategory;
+        if (!card.hidden) visibleCount += 1;
+    });
+
+    const emptyMessage = document.getElementById('contactsEmpty');
+    if (emptyMessage) emptyMessage.hidden = visibleCount > 0;
+}
+
+async function copyContactNumber(number) {
+    let field;
+
+    try {
+        if (typeof navigator.clipboard?.writeText === 'function') {
+            await navigator.clipboard.writeText(number);
+        } else {
+            field = document.createElement('textarea');
+            field.value = number;
+            field.setAttribute('readonly', '');
+            field.style.position = 'fixed';
+            field.style.opacity = '0';
+            document.body.appendChild(field);
+            field.select();
+            const copied = document.execCommand('copy');
+            if (!copied) throw new Error('Clipboard copy was rejected');
+        }
+
+        toast(`Copied ${number}`);
+    } catch (error) {
+        toast('Could not copy the number. Please select it and copy manually.', true);
+    } finally {
+        field?.remove();
+    }
+}
+
+function openContactsDialog(dialogId) {
+    const dialog = document.getElementById(dialogId);
+    if (!dialog || typeof dialog.showModal !== 'function') {
+        toast('This browser does not support the contact dialog.', true);
+        return;
+    }
+
+    dialog.showModal();
+    dialog.querySelector('input, select, textarea')?.focus();
+}
+
+function previewContactAction(form) {
+    const notice = form.querySelector('.contacts-dialog-notice');
+    if (!notice) return;
+
+    const values = new FormData(form);
+    if (form.dataset.previewForm === 'report') {
+        notice.textContent = `Preview ready for ${values.get('hotline')}. This report was not submitted or stored.`;
+        toast('Preview only — report not submitted.');
+        return;
+    }
+
+    notice.textContent = `Preview ready: ${values.get('name')} · ${values.get('phone')} · ${values.get('category')}. This contact was not saved.`;
+    toast('Preview only — contact not saved.');
+}
+
 function renderStats(stats) {
     document.getElementById('activeCount').textContent = stats.active ?? 0;
     document.getElementById('respondersCount').textContent = stats.responding ?? 0;
@@ -246,6 +314,38 @@ function init() {
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
+
+    const contactsTab = document.getElementById('contactsTab');
+    document.getElementById('contactCategory')?.addEventListener('change', filterContacts);
+    contactsTab?.addEventListener('click', event => {
+        const copyButton = event.target.closest('[data-copy-number]');
+        if (copyButton) {
+            copyContactNumber(copyButton.dataset.copyNumber);
+            return;
+        }
+
+        const openButton = event.target.closest('[data-open-contact-dialog]');
+        if (openButton) openContactsDialog(openButton.dataset.openContactDialog);
+    });
+    contactsTab?.addEventListener('submit', event => {
+        const form = event.target.closest('[data-preview-form]');
+        if (!form) return;
+
+        event.preventDefault();
+        previewContactAction(form);
+    });
+    contactsTab?.querySelectorAll('.contacts-dialog').forEach(dialog => {
+        dialog.addEventListener('close', () => {
+            dialog.querySelector('[data-preview-form]')?.reset();
+            const notice = dialog.querySelector('.contacts-dialog-notice');
+            if (notice) {
+                notice.textContent = notice.closest('[data-preview-form]')?.dataset.previewForm === 'report'
+                    ? 'Preview only. This report will not be sent or stored.'
+                    : 'Preview only. This contact will not be saved or added to the hotline list.';
+            }
+        });
+    });
+    filterContacts();
 
     document.getElementById('alertsGrid').addEventListener('click', event => {
         const button = event.target.closest('[data-next-status]');
