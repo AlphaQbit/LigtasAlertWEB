@@ -143,7 +143,8 @@ function renderStats(stats) {
 
 function renderAlertCards(alerts, grid, emptyMessage, includeActions) {
     if (!alerts.length) {
-        grid.innerHTML = `<div class="loading">${emptyMessage}</div>`;
+        grid.innerHTML = `<div class="loading"><span class="lucide lucide-siren" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>${emptyMessage}</div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
@@ -205,7 +206,8 @@ function renderActivity(alerts) {
     const log = document.getElementById('activityLog');
 
     if (!alerts.length) {
-        log.innerHTML = '<div class="loading">No recent activity</div>';
+        log.innerHTML = '<div class="loading"><span class="lucide lucide-clock" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>No recent activity</div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
@@ -432,7 +434,8 @@ function renderReportBars(containerId, rows, labelKey) {
     if (!container) return;
 
     if (!rows.length) {
-        container.innerHTML = '<div class="loading">No data in this range</div>';
+        container.innerHTML = '<div class="loading"><span class="lucide lucide-chart-no-axes-column" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>No data in this range</div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
