@@ -9,6 +9,7 @@
 </head>
 <body>
 @yield('content')
+<script src="{{ asset('js/lucide.min.js') }}"></script>
 <script src="{{ asset('js/admin.js') }}"></script>
 </body>
 </html>
