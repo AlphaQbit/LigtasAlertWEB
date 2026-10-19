@@ -28,12 +28,12 @@ class AuthTest extends TestCase
         $this->assertSame(1, substr_count($html, 'id="form-register"'));
         $this->assertSame(1, substr_count($html, 'auth/microsoft/redirect'));
         $this->assertStringContainsString('Continue with Microsoft', $html);
+        $this->assertStringNotContainsString('Full Name', $html);
     }
 
     public function test_registration_creates_account_but_requires_login(): void
     {
         $response = $this->post('/register', [
-            'name' => 'Responder One',
             'email' => 'responder@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -43,13 +43,15 @@ class AuthTest extends TestCase
         $response->assertSessionHas('status', 'Registration successful. Please log in.');
 
         $this->assertGuest();
-        $this->assertDatabaseHas('users', ['email' => 'responder@example.com']);
+        $this->assertDatabaseHas('users', [
+            'email' => 'responder@example.com',
+            'name' => 'responder@example.com',
+        ]);
     }
 
     public function test_newly_registered_user_can_log_in_afterwards(): void
     {
         $this->post('/register', [
-            'name' => 'Responder One',
             'email' => 'responder@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -66,7 +68,6 @@ class AuthTest extends TestCase
     public function test_registration_requires_matching_password_confirmation(): void
     {
         $this->post('/register', [
-            'name' => 'Responder One',
             'email' => 'responder@example.com',
             'password' => 'password123',
             'password_confirmation' => 'different-password',
@@ -80,7 +81,6 @@ class AuthTest extends TestCase
         User::factory()->create(['email' => 'responder@example.com']);
 
         $this->post('/register', [
-            'name' => 'Impostor',
             'email' => 'responder@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
