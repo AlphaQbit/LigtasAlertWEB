@@ -118,6 +118,8 @@
                             <div class="auth-error">{{ $errors->first() }}</div>
                         @endif
                         <div class="input-group">
+
+                        <div class="input-group">
                             <label class="input-label">Email address</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -126,7 +128,6 @@
                                 <input type="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="example@edu.ph.com" required autocomplete="email">
                             </div>
                         </div>
-
                         <div class="input-group">
                             <label class="input-label">Password</label>
                             <div class="input-wrapper">
