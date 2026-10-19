@@ -136,7 +136,6 @@
                                 <input type="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="example@edu.ph.com" required autocomplete="email">
                             </div>
                         </div>
-
                         <div class="input-group">
                             <label class="input-label">Password</label>
                             <div class="input-wrapper">

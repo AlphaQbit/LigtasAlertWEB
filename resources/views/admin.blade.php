@@ -1,6 +1,25 @@
 @extends('layouts.admin')
 
 @section('content')
+@php
+    $profileName = auth()->user()->name;
+    $profileEmail = auth()->user()->email;
+    $microsoftProfile = session('microsoft_profile');
+
+    if (is_array($microsoftProfile) && ($microsoftProfile['user_id'] ?? null) === auth()->id()) {
+        $profileName = $microsoftProfile['name'] ?? $profileName;
+        $profileEmail = $microsoftProfile['email'] ?? $profileEmail;
+        $profilePhoto = $microsoftProfile['photo'] ?? null;
+    } else {
+        $profilePhoto = null;
+    }
+
+    $profileInitials = collect(preg_split('/\s+/', trim($profileName)) ?: [])
+        ->filter()
+        ->take(2)
+        ->map(fn ($part) => mb_substr($part, 0, 1))
+        ->implode('');
+@endphp
 <div class="header">
         <div class="nav-container">
             <div class="nav-header">
@@ -13,6 +32,12 @@
                         <select id="facility">
                             <option value="all">All Facilities</option>
                         </select>
+                    </div>
+                    <div class="admin-profile-avatar" role="img" aria-label="Administrator profile picture for {{ $profileName }}" title="{{ $profileName }} ({{ $profileEmail }})">
+                        @if ($profilePhoto)
+                            <img src="{{ $profilePhoto }}" alt="" onerror="this.hidden = true; this.nextElementSibling.hidden = false;">
+                        @endif
+                        <span class="admin-profile-initials" @if ($profilePhoto) hidden @endif>{{ $profileInitials }}</span>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

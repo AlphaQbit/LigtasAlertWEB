@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -37,6 +40,7 @@ class AuthController extends Controller
                 ->withErrors(['email' => 'These credentials do not match our records.']);
         }
 
+        $request->session()->forget('microsoft_profile');
         $request->session()->regenerate();
 
         return redirect()->intended(route('admin'));
@@ -69,7 +73,9 @@ class AuthController extends Controller
 
     public function microsoftRedirect(): RedirectResponse
     {
-        return Socialite::driver('microsoft')->redirect();
+        return Socialite::driver('microsoft')
+            ->scopes(['User.Read'])
+            ->redirect();
     }
 
     public function microsoftCallback(Request $request): RedirectResponse
@@ -96,7 +102,48 @@ class AuthController extends Controller
         Auth::login($user, remember: true);
 
         $request->session()->regenerate();
+        $request->session()->put('microsoft_profile', [
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'photo' => $this->microsoftProfilePhoto($microsoftUser->token),
+        ]);
 
         return redirect()->intended(route('admin'));
+    }
+
+    private function microsoftProfilePhoto(?string $accessToken): ?string
+    {
+        if (! $accessToken) {
+            return null;
+        }
+
+        try {
+            $response = Http::withToken($accessToken)
+                ->accept('image/*')
+                ->timeout(5)
+                ->get('https://graph.microsoft.com/v1.0/me/photo/$value');
+        } catch (ConnectionException) {
+            Log::warning('Microsoft profile photo request could not connect.');
+
+            return null;
+        }
+
+        if (! $response->successful()) {
+            Log::notice('Microsoft profile photo is unavailable.', ['status' => $response->status()]);
+
+            return null;
+        }
+
+        $contentType = strtolower(trim(explode(';', $response->header('Content-Type', ''))[0]));
+        $photo = $response->body();
+
+        if (! in_array($contentType, ['image/jpeg', 'image/png', 'image/gif'], true) || $photo === '' || strlen($photo) > 1_000_000) {
+            Log::warning('Microsoft profile photo response had an unsupported format or size.');
+
+            return null;
+        }
+
+        return 'data:'.$contentType.';base64,'.base64_encode($photo);
     }
 }
