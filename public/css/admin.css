@@ -61,8 +61,11 @@
             color: var(--text-primary);
         }
 
-        .header-title svg {
-            color: var(--primary);
+        .header-title .header-logo {
+            width: 1.75rem;
+            height: 1.75rem;
+            object-fit: contain;
+            flex: 0 0 auto;
         }
 
         .nav-tabs {
