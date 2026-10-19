@@ -19,7 +19,13 @@ class AuthTest extends TestCase
 
     public function test_login_page_renders(): void
     {
-        $this->get('/login')->assertOk();
+        $response = $this->get('/login')->assertOk();
+        $html = $response->getContent();
+
+        $this->assertSame(1, substr_count($html, 'id="form-login"'));
+        $this->assertSame(1, substr_count($html, 'id="form-register"'));
+        $this->assertSame(1, substr_count($html, 'auth/microsoft/redirect'));
+        $this->assertStringContainsString('Continue with Microsoft', $html);
     }
 
     public function test_registration_creates_account_but_requires_login(): void
