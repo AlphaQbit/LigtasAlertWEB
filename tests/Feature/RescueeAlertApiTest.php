@@ -359,4 +359,116 @@ class RescueeAlertApiTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.user_id', $user->id);
     }
+
+    /**
+     * The dashboard polls /admin/alerts for active alerts. The unknown-room
+     * location string must survive the API resource and appear in the dashboard
+     * data endpoint exactly as submitted, so a rescuer sees the explicit marker.
+     */
+    public function test_unknown_room_location_appears_in_dashboard_data(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'MCC MAIN (exact room not provided)',
+        ]);
+
+        $alertId = $response->json('data.id');
+
+        // Dashboard user fetches alerts via session auth
+        $rescuer = User::factory()->create();
+        $this->actingAs($rescuer)
+            ->getJson('/admin/alerts')
+            ->assertOk()
+            ->assertJsonPath("data.0.location", 'MCC MAIN (exact room not provided)')
+            ->assertJsonPath("data.0.id", $alertId);
+    }
+
+    /**
+     * Full cross-app contract: mobile submits alert -> backend persists ->
+     * rescuer acknowledges via dashboard -> mobile sees updated status.
+     * Uses only existing API contracts and test infrastructure.
+     */
+    public function test_alert_lifecycle_mobile_to_dashboard_to_mobile(): void
+    {
+        // 1. Rescuee submits alert via Sanctum token
+        $rescuee = User::factory()->create();
+        $token = $rescuee->createToken('mobile')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'Room 204',
+            'details' => 'Test lifecycle',
+        ]);
+
+        $response->assertCreated();
+        $alertId = $response->json('data.id');
+        $this->assertEquals(Alert::STATUS_ACTIVE, $response->json('data.status'));
+        $this->assertTrue($response->json('data.open'));
+
+        // 2. Rescuer (web user) views alert in dashboard
+        $rescuer = User::factory()->create();
+        $this->actingAs($rescuer)
+            ->getJson('/admin/alerts')
+            ->assertOk()
+            ->assertJsonPath("data.0.id", $alertId)
+            ->assertJsonPath("data.0.status", Alert::STATUS_ACTIVE);
+
+        // 3. Rescuer acknowledges the alert
+        $this->actingAs($rescuer)
+            ->patchJson("/admin/alerts/{$alertId}/status", [
+                'status' => Alert::STATUS_ACKNOWLEDGED,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
+            ->assertJsonPath('data.open', true);
+
+        $this->assertNotNull(Alert::find($alertId)->acknowledged_at);
+        $this->assertNull(Alert::find($alertId)->resolved_at);
+
+        // 4. Rescuee polls and sees updated status
+        $this->app['auth']->guard('sanctum')->forgetUser();
+        $this->flushHeaders();
+        $this->getJson("/api/alerts/{$alertId}", [
+            'Authorization' => 'Bearer ' . $token,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
+            ->assertJsonPath('data.open', true);
+
+        // 5. Rescuer responds (allowed transition: acknowledged -> responding)
+        $this->actingAs($rescuer)
+            ->patchJson("/admin/alerts/{$alertId}/status", [
+                'status' => Alert::STATUS_RESPONDING,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESPONDING);
+
+        // 6. Rescuer resolves the alert (allowed: responding -> resolved)
+        $this->actingAs($rescuer)
+            ->patchJson("/admin/alerts/{$alertId}/status", [
+                'status' => Alert::STATUS_RESOLVED,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
+            ->assertJsonPath('data.open', false)
+            ->assertJsonStructure(['data' => ['resolved_at']]);
+
+        $this->assertNotNull(Alert::find($alertId)->resolved_at);
+
+        // 7. Mobile sees final resolved status
+        $this->app['auth']->guard('sanctum')->forgetUser();
+        $this->flushHeaders();
+        $this->getJson("/api/alerts/{$alertId}", [
+            'Authorization' => 'Bearer ' . $token,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
+            ->assertJsonPath('data.open', false)
+            ->assertJsonStructure(['data' => ['resolved_at']]);
+    }
 }

@@ -16,7 +16,7 @@ class AdminContactsTest extends TestCase
             ->get('/admin')
             ->assertOk()
             ->assertSee('contacts-icon-library')
-            ->assertSee('contactSearch')
+            ->assertSee('Category')
             ->assertSee('contactCategory')
             ->assertSee('data-category="medical"', false)
             ->assertSee('data-category="security"', false)
