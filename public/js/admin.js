@@ -83,8 +83,20 @@ async function copyContactNumber(number) {
 
     try {
         if (typeof navigator.clipboard?.writeText === 'function') {
-            await navigator.clipboard.writeText(number);
+            try {
+                await navigator.clipboard.writeText(number);
+            } catch (clipboardError) {
+                // Clipboard API failed (e.g., HTTP/localhost requires HTTPS), fall back to execCommand
+                throw clipboardError;
+            }
         } else {
+            throw new Error('Clipboard API not available');
+        }
+
+        toast(`Copied ${number}`);
+    } catch (error) {
+        // Fallback to document.execCommand('copy') for HTTP/localhost or when Clipboard API fails
+        try {
             field = document.createElement('textarea');
             field.value = number;
             field.setAttribute('readonly', '');
@@ -94,13 +106,13 @@ async function copyContactNumber(number) {
             field.select();
             const copied = document.execCommand('copy');
             if (!copied) throw new Error('Clipboard copy was rejected');
-        }
 
-        toast(`Copied ${number}`);
-    } catch (error) {
-        toast('Could not copy the number. Please select it and copy manually.', true);
-    } finally {
-        field?.remove();
+            toast(`Copied ${number}`);
+        } catch (execError) {
+            toast('Could not copy the number. Please select it and copy manually.', true);
+        } finally {
+            field?.remove();
+        }
     }
 }
 

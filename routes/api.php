@@ -8,15 +8,17 @@ use Illuminate\Support\Facades\Route;
 // Rescuee app. Sending requires authentication so every alert is tied to a
 // rescuee account. This ensures ownership for status reading and prevents abuse.
 Route::post('/alerts', [MobileAlertController::class, 'store'])
-    ->middleware('auth:sanctum');
+    ->middleware(['auth:sanctum', 'throttle:alerts']);
 Route::get('/alerts/{alert}', [MobileAlertController::class, 'show'])
     ->middleware('auth:sanctum')
     ->whereNumber('alert');
 
 // Rescuee app auth. Bearer tokens (Sanctum), not session cookies, so the
 // browser dev server and a real device use exactly the same endpoints.
-Route::post('/auth/register', [MobileAuthController::class, 'register']);
-Route::post('/auth/login', [MobileAuthController::class, 'login']);
+Route::post('/auth/register', [MobileAuthController::class, 'register'])
+    ->middleware('throttle:register');
+Route::post('/auth/login', [MobileAuthController::class, 'login'])
+    ->middleware('throttle:login');
 Route::get('/auth/microsoft/start', [MobileAuthController::class, 'microsoftStart']);
 Route::get('/auth/microsoft/callback', [MobileAuthController::class, 'microsoftCallback']);
 Route::get('/auth/microsoft/finish', [MobileAuthController::class, 'microsoftFinish']);

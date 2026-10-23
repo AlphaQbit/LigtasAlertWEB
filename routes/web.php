@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/login', [AuthController::class, 'login'])->name('login.store');
-Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::post('/login', [AuthController::class, 'login'])->name('login.store')->middleware('throttle:login');
+Route::post('/register', [AuthController::class, 'register'])->name('register.store')->middleware('throttle:register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/auth/microsoft/redirect', [AuthController::class, 'microsoftRedirect'])->name('microsoft.redirect');
@@ -22,7 +22,7 @@ Route::get('/admin/alerts', [AlertController::class, 'index'])
     ->middleware('auth')
     ->name('alerts.index');
 Route::patch('/admin/alerts/{alert}/status', [AlertController::class, 'updateStatus'])
-    ->middleware('auth')
+    ->middleware(['auth', 'throttle:status-update'])
     ->name('alerts.status');
 
 // Read-only incident reports and CSV export.

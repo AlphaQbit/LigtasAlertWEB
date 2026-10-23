@@ -278,4 +278,83 @@ class AuthTest extends TestCase
 
         $this->assertGuest();
     }
+
+    /**
+     * Rate limiting tests for web authentication endpoints.
+     */
+    public function test_web_login_rate_limit(): void
+    {
+        User::factory()->create([
+            'email' => 'responder@example.com',
+            'password' => 'password123',
+        ]);
+
+        // First 5 requests should succeed (5 per minute)
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/login', [
+                'email' => 'responder@example.com',
+                'password' => 'wrong-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        // 6th request should be rate limited
+        $this->post('/login', [
+            'email' => 'responder@example.com',
+            'password' => 'wrong-password',
+        ])->assertStatus(429);
+    }
+
+    public function test_web_register_rate_limit(): void
+    {
+        // First 3 requests should succeed (3 per minute)
+        for ($i = 0; $i < 3; $i++) {
+            $this->post('/register', [
+                'name' => 'Rescuee '.$i,
+                'email' => "rescuee{$i}@example.com",
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ])->assertRedirect('/login');
+        }
+
+        // 4th request should be rate limited
+        $this->post('/register', [
+            'name' => 'Rescuee 3',
+            'email' => 'rescuee3@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertStatus(429);
+    }
+
+    public function test_web_login_rate_limit_is_per_ip(): void
+    {
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+
+        User::factory()->create([
+            'email' => 'responder@example.com',
+            'password' => 'password123',
+        ]);
+
+        // Exhaust rate limit from first IP (10.0.0.1)
+        for ($i = 0; $i < 5; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+                ->post('/login', [
+                    'email' => 'responder@example.com',
+                    'password' => 'wrong-password',
+                ])->assertSessionHasErrors('email');
+        }
+
+        // 6th request from first IP should be rate limited
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->post('/login', [
+                'email' => 'responder@example.com',
+                'password' => 'wrong-password',
+            ])->assertStatus(429);
+
+        // Request from different IP (10.0.0.2) should NOT be rate limited
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])
+            ->post('/login', [
+                'email' => 'responder@example.com',
+                'password' => 'wrong-password',
+            ])->assertSessionHasErrors('email');
+    }
 }

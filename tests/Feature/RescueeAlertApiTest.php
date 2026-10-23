@@ -17,6 +17,7 @@ class RescueeAlertApiTest extends TestCase
         // Clear any actingAs user from previous tests to avoid auth pollution
         // Sanctum uses 'web' guard for session auth, so clear it explicitly
         $this->app['auth']->guard('web')->forgetUser();
+        $this->app['auth']->guard('sanctum')->forgetUser();
         $this->flushHeaders();
     }
 
@@ -195,7 +196,7 @@ class RescueeAlertApiTest extends TestCase
 
         // Rescuee reads alert via token auth
         $this->getJson("/api/alerts/{$alert->id}", [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->assertOk()
             ->assertJsonPath('data.status', Alert::STATUS_ACTIVE);
 
@@ -260,6 +261,199 @@ class RescueeAlertApiTest extends TestCase
             ->assertStatus(409);
 
         $this->assertSame(Alert::STATUS_RESOLVED, $alert->fresh()->status);
+    }
+
+    /**
+     * Valid status transitions from active.
+     */
+    public function test_active_to_responding(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACTIVE]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESPONDING])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESPONDING)
+            ->assertJsonPath('data.open', true);
+
+        $this->assertEquals(Alert::STATUS_RESPONDING, $alert->fresh()->status);
+    }
+
+    public function test_active_to_acknowledged(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACTIVE]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
+            ->assertJsonPath('data.open', true)
+            ->assertJsonPath('data.acknowledged_at', $alert->fresh()->acknowledged_at->toIso8601String());
+
+        $this->assertNotNull($alert->fresh()->acknowledged_at);
+    }
+
+    public function test_active_to_resolved(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACTIVE]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESOLVED])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
+            ->assertJsonPath('data.open', false)
+            ->assertJsonPath('data.resolved_at', $alert->fresh()->resolved_at->toIso8601String());
+
+        $this->assertNotNull($alert->fresh()->resolved_at);
+    }
+
+    /**
+     * Valid status transitions from responding.
+     */
+    public function test_responding_to_acknowledged(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_RESPONDING]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
+            ->assertJsonPath('data.open', true)
+            ->assertJsonPath('data.acknowledged_at', $alert->fresh()->acknowledged_at->toIso8601String());
+
+        $this->assertNotNull($alert->fresh()->acknowledged_at);
+    }
+
+    public function test_responding_to_resolved(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_RESPONDING]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESOLVED])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
+            ->assertJsonPath('data.open', false)
+            ->assertJsonPath('data.resolved_at', $alert->fresh()->resolved_at->toIso8601String());
+
+        $this->assertNotNull($alert->fresh()->resolved_at);
+    }
+
+    /**
+     * Valid status transitions from acknowledged.
+     */
+    public function test_acknowledged_to_responding(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACKNOWLEDGED]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESPONDING])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESPONDING)
+            ->assertJsonPath('data.open', true);
+
+        $this->assertEquals(Alert::STATUS_RESPONDING, $alert->fresh()->status);
+    }
+
+    public function test_acknowledged_to_resolved(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACKNOWLEDGED]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESOLVED])
+            ->assertOk()
+            ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
+            ->assertJsonPath('data.open', false)
+            ->assertJsonPath('data.resolved_at', $alert->fresh()->resolved_at->toIso8601String());
+
+        $this->assertNotNull($alert->fresh()->resolved_at);
+    }
+
+    /**
+     * Invalid status transitions (should be refused with 409).
+     * Note: STATUS_ACTIVE is not in the allowed list for status updates, so it returns 422.
+     * These tests verify transitions that ARE in the allowed list but invalid for the current state.
+     */
+    public function test_responding_to_responding_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_RESPONDING]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESPONDING])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_RESPONDING, $alert->fresh()->status);
+    }
+
+    public function test_acknowledged_to_acknowledged_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_ACKNOWLEDGED]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_ACKNOWLEDGED, $alert->fresh()->status);
+    }
+
+    public function test_resolved_to_responding_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->resolved()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESPONDING])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_RESOLVED, $alert->fresh()->status);
+    }
+
+    public function test_resolved_to_acknowledged_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->resolved()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_ACKNOWLEDGED])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_RESOLVED, $alert->fresh()->status);
+    }
+
+    public function test_resolved_to_resolved_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $alert = Alert::factory()->resolved()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESOLVED])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_RESOLVED, $alert->fresh()->status);
+    }
+
+    /**
+     * Same-status no-op is refused.
+     */
+    public function test_same_status_transition_is_refused(): void
+    {
+        // Test with a status that IS in the allowed list (responding)
+        $user = User::factory()->create();
+        $alert = Alert::factory()->create(['user_id' => $user->id, 'status' => Alert::STATUS_RESPONDING]);
+
+        $this->actingAs($user)
+            ->patchJson("/admin/alerts/{$alert->id}/status", ['status' => Alert::STATUS_RESPONDING])
+            ->assertStatus(409);
+
+        $this->assertSame(Alert::STATUS_RESPONDING, $alert->fresh()->status);
     }
 
     public function test_dashboard_requires_login(): void
@@ -383,8 +577,8 @@ class RescueeAlertApiTest extends TestCase
         $this->actingAs($rescuer)
             ->getJson('/admin/alerts')
             ->assertOk()
-            ->assertJsonPath("data.0.location", 'MCC MAIN (exact room not provided)')
-            ->assertJsonPath("data.0.id", $alertId);
+            ->assertJsonPath('data.0.location', 'MCC MAIN (exact room not provided)')
+            ->assertJsonPath('data.0.id', $alertId);
     }
 
     /**
@@ -415,8 +609,8 @@ class RescueeAlertApiTest extends TestCase
         $this->actingAs($rescuer)
             ->getJson('/admin/alerts')
             ->assertOk()
-            ->assertJsonPath("data.0.id", $alertId)
-            ->assertJsonPath("data.0.status", Alert::STATUS_ACTIVE);
+            ->assertJsonPath('data.0.id', $alertId)
+            ->assertJsonPath('data.0.status', Alert::STATUS_ACTIVE);
 
         // 3. Rescuer acknowledges the alert
         $this->actingAs($rescuer)
@@ -434,7 +628,7 @@ class RescueeAlertApiTest extends TestCase
         $this->app['auth']->guard('sanctum')->forgetUser();
         $this->flushHeaders();
         $this->getJson("/api/alerts/{$alertId}", [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])
             ->assertOk()
             ->assertJsonPath('data.status', Alert::STATUS_ACKNOWLEDGED)
@@ -464,11 +658,131 @@ class RescueeAlertApiTest extends TestCase
         $this->app['auth']->guard('sanctum')->forgetUser();
         $this->flushHeaders();
         $this->getJson("/api/alerts/{$alertId}", [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])
             ->assertOk()
             ->assertJsonPath('data.status', Alert::STATUS_RESOLVED)
             ->assertJsonPath('data.open', false)
             ->assertJsonStructure(['data' => ['resolved_at']]);
+    }
+
+    /**
+     * Rate limiting tests for alert submission and status updates.
+     */
+    public function test_alert_submission_rate_limit(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        // First 10 requests should succeed (10 per minute per user)
+        for ($i = 0; $i < 10; $i++) {
+            $this->withToken($token)->postJson('/api/alerts', [
+                'facility' => 'MCC MAIN',
+                'type' => 'Medical',
+                'location' => "Room {$i}",
+            ])->assertCreated();
+        }
+
+        // 11th request should be rate limited
+        $this->withToken($token)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'Room 11',
+        ])->assertStatus(429);
+    }
+
+    public function test_alert_submission_rate_limit_is_per_user(): void
+    {
+        $user1 = User::factory()->create();
+        $token1 = $user1->createToken('mobile')->plainTextToken;
+
+        $user2 = User::factory()->create();
+        $token2 = $user2->createToken('mobile')->plainTextToken;
+
+        // User 1 exhausts their rate limit
+        for ($i = 0; $i < 10; $i++) {
+            $this->withToken($token1)->postJson('/api/alerts', [
+                'facility' => 'MCC MAIN',
+                'type' => 'Medical',
+                'location' => "Room {$i}",
+            ])->assertCreated();
+        }
+
+        // User 1 should be rate limited
+        $this->withToken($token1)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'Room 11',
+        ])->assertStatus(429);
+
+        // User 2 should not be rate limited
+        // Forget the cached Sanctum user so User 2's token is actually used.
+        $this->app['auth']->guard('sanctum')->forgetUser();
+        $this->withToken($token2)->postJson('/api/alerts', [
+            'facility' => 'MCC MAIN',
+            'type' => 'Medical',
+            'location' => 'Room 1',
+        ])->assertCreated()
+            // The created alert must belong to User 2, not the cached User 1.
+            ->assertJsonPath('data.user_id', $user2->id);
+    }
+
+    public function test_status_update_rate_limit(): void
+    {
+        $user = User::factory()->create();
+        $rescuer = User::factory()->create();
+
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
+
+        // First 30 requests should succeed (30 per minute per user)
+        for ($i = 0; $i < 30; $i++) {
+            $this->actingAs($rescuer)
+                ->patchJson("/admin/alerts/{$alert->id}/status", [
+                    'status' => Alert::STATUS_ACKNOWLEDGED,
+                ])->assertOk();
+
+            // Reset alert to active for next iteration.
+            // refresh() reloads from DB so the model sees the current state.
+            $alert->refresh();
+            $alert->update(['status' => Alert::STATUS_ACTIVE]);
+        }
+
+        // 31st request should be rate limited
+        $this->actingAs($rescuer)
+            ->patchJson("/admin/alerts/{$alert->id}/status", [
+                'status' => Alert::STATUS_ACKNOWLEDGED,
+            ])->assertStatus(429);
+    }
+
+    public function test_status_update_rate_limit_is_per_user(): void
+    {
+        $user = User::factory()->create();
+        $rescuer1 = User::factory()->create();
+        $rescuer2 = User::factory()->create();
+
+        $alert = Alert::factory()->create(['user_id' => $user->id]);
+
+        // Rescuer 1 exhausts their rate limit
+        for ($i = 0; $i < 30; $i++) {
+            $this->actingAs($rescuer1)
+                ->patchJson("/admin/alerts/{$alert->id}/status", [
+                    'status' => Alert::STATUS_ACKNOWLEDGED,
+                ])->assertOk();
+
+            $alert->refresh();
+            $alert->update(['status' => Alert::STATUS_ACTIVE]);
+        }
+
+        // Rescuer 1 should be rate limited
+        $this->actingAs($rescuer1)
+            ->patchJson("/admin/alerts/{$alert->id}/status", [
+                'status' => Alert::STATUS_ACKNOWLEDGED,
+            ])->assertStatus(429);
+
+        // Rescuer 2 should not be rate limited
+        $this->actingAs($rescuer2)
+            ->patchJson("/admin/alerts/{$alert->id}/status", [
+                'status' => Alert::STATUS_ACKNOWLEDGED,
+            ])->assertOk();
     }
 }
