@@ -26,9 +26,19 @@ class AuthTest extends TestCase
 
         $this->assertSame(1, substr_count($html, 'id="form-login"'));
         $this->assertSame(1, substr_count($html, 'id="form-register"'));
+        $this->assertStringContainsString('id="form-login" class="auth-form login-form active"', $html);
+        $this->assertStringNotContainsString('id="form-register" class="auth-form active"', $html);
         $this->assertSame(1, substr_count($html, 'auth/microsoft/redirect'));
         $this->assertStringContainsString('Continue with Microsoft', $html);
         $this->assertStringNotContainsString('Full Name', $html);
+    }
+
+    public function test_register_page_activates_registration_form_only(): void
+    {
+        $html = $this->get('/register')->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="form-register" class="auth-form active"', $html);
+        $this->assertStringNotContainsString('id="form-login" class="auth-form login-form active"', $html);
     }
 
     public function test_registration_creates_account_but_requires_login(): void

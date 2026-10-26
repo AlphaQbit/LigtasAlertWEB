@@ -118,8 +118,6 @@
                             <div class="auth-error">{{ $errors->first() }}</div>
                         @endif
                         <div class="input-group">
-
-                        <div class="input-group">
                             <label class="input-label">Email address</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
