@@ -194,7 +194,20 @@ function renderAlertCards(alerts, grid, emptyMessage, includeActions) {
 
 function renderAlerts(alerts) {
     const activeAlerts = alerts.filter(alert => alert.status !== 'resolved');
+    const badge = document.getElementById('activeIncidentsBadge');
+    if (badge) {
+        badge.textContent = `${activeAlerts.length} live`;
+        badge.hidden = activeAlerts.length === 0;
+    }
+
     renderAlertCards(activeAlerts, document.getElementById('alertsGrid'), 'No active incidents', true);
+    if (activeAlerts.length === 0) {
+        document.getElementById('alertsGrid').innerHTML = `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+                <span>No active incidents</span>
+            </div>`;
+    }
 }
 
 function renderHistory(alerts) {
@@ -211,16 +224,38 @@ function renderActivity(alerts) {
         return;
     }
 
-    log.innerHTML = alerts.map(alert => `
+    const activityIcon = (type) => {
+        const normalizedType = (type || '').toLowerCase();
+        if (normalizedType.includes('medical')) {
+            return ['medical', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4l3-9 4 18 3-9h6"></path></svg>'];
+        }
+        if (normalizedType.includes('fire')) {
+            return ['fire', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.5 1-3 3.5-3 5.5a6 6 0 0 0 12 0c0-4-2.5-7-5-9-.5 3-2 4-2 6a2.5 2.5 0 0 1-1 2Z"></path></svg>'];
+        }
+        if (normalizedType.includes('fall')) {
+            return ['fall', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2"></circle><path d="m9 22 2-7-3-3 2-4 5 2 2 4-3 2 1 6"></path></svg>'];
+        }
+        return ['other', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path><path d="m9 12 2 2 4-4"></path></svg>'];
+    };
+
+    log.innerHTML = alerts.map(alert => {
+        const [category, icon] = activityIcon(alert.type);
+        const activityMeta = [
+            alert.status === 'resolved' ? '' : (STATUS_LABELS[alert.status] ?? alert.status),
+            alert.response_seconds != null ? `${alert.response_seconds}s response` : '',
+        ].filter(Boolean).join(' · ');
+        return `
         <div class="activity-item">
-            <span class="activity-time">${timeOfDay(alert.created_at)}</span>
-            <span class="activity-icon ${alert.status === 'resolved' ? 'resolved' : 'alert'}"></span>
+            <span class="activity-icon ${category}">${icon}</span>
             <div class="activity-text">
-                <strong>${escapeHtml(alert.type)}</strong> at ${escapeHtml(alert.location)}
-                — ${STATUS_LABELS[alert.status] ?? alert.status}
-                ${alert.response_seconds != null ? `(${alert.response_seconds}s response)` : ''}
+                <strong>${escapeHtml(alert.type)}</strong>
+                <span class="activity-location">at ${escapeHtml(alert.location)}</span>
+                ${activityMeta ? `<span class="activity-meta">${escapeHtml(activityMeta)}</span>` : ''}
             </div>
-        </div>`).join('');
+            ${alert.status === 'resolved' ? '<span class="activity-resolved">Resolved</span>' : ''}
+            <span class="activity-time">${timeOfDay(alert.created_at)}</span>
+        </div>`;
+    }).join('');
 }
 
 async function refresh() {
@@ -244,7 +279,8 @@ async function refresh() {
         renderStats(payload.stats);
         renderAlerts(payload.data);
         renderHistory(payload.history);
-        renderActivity(payload.data);
+        renderActivity([...payload.data, ...payload.history]
+            .sort((first, second) => new Date(second.created_at) - new Date(first.created_at)));
     } catch (error) {
         toast(`Could not reach the server: ${error.message}`, true);
     }
@@ -279,6 +315,11 @@ async function updateStatus(alertId, status) {
 function switchTab(tabName) {
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.tab === tabName);
+        if (tab.dataset.tab === tabName) {
+            tab.setAttribute('aria-current', 'page');
+        } else {
+            tab.removeAttribute('aria-current');
+        }
     });
 
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -288,6 +329,8 @@ function switchTab(tabName) {
     if (tabName === 'reports') {
         loadReports();
     }
+
+    closeSidebar();
 }
 
 function populateFacilities(alerts) {
@@ -315,6 +358,42 @@ function populateFacilities(alerts) {
 function init() {
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    if (sidebarToggle && window.matchMedia('(max-width: 760px)').matches) {
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+    sidebarToggle?.addEventListener('click', () => {
+        const isMobile = window.matchMedia('(max-width: 760px)').matches;
+        if (isMobile) {
+            document.body.classList.toggle('sidebar-open');
+        } else {
+            document.body.classList.toggle('sidebar-collapsed');
+        }
+        sidebarToggle.setAttribute('aria-expanded', String(
+            isMobile
+                ? document.body.classList.contains('sidebar-open')
+                : !document.body.classList.contains('sidebar-collapsed'),
+        ));
+    });
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeSidebar();
+    });
+    window.addEventListener('resize', () => {
+        const isMobile = window.matchMedia('(max-width: 760px)').matches;
+        if (isMobile) {
+            document.body.classList.remove('sidebar-collapsed');
+        } else {
+            document.body.classList.remove('sidebar-open');
+        }
+        sidebarToggle?.setAttribute('aria-expanded', String(
+            isMobile
+                ? document.body.classList.contains('sidebar-open')
+                : !document.body.classList.contains('sidebar-collapsed'),
+        ));
     });
 
     const contactsTab = document.getElementById('contactsTab');
@@ -373,6 +452,14 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+    const toggle = document.getElementById('sidebarToggle');
+    if (toggle && window.matchMedia('(max-width: 760px)').matches) {
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+}
 
 /* ---------------------------------------------------------------------------
  * Incident Reports tab. Polls /admin/reports with the same session cookie as

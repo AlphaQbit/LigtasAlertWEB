@@ -14,52 +14,65 @@
         $profilePhoto = null;
     }
 
+    $profileFirstName = collect(preg_split('/\s+/', trim($profileName)) ?: [])->first();
     $profileInitials = collect(preg_split('/\s+/', trim($profileName)) ?: [])
         ->filter()
         ->take(2)
         ->map(fn ($part) => mb_substr($part, 0, 1))
         ->implode('');
 @endphp
-<div class="header">
-        <div class="nav-container">
-            <div class="nav-header">
-                <div class="header-title">
-                    <img class="header-logo" src="{{ asset('assets/ligtasLOGO.png') }}" alt="">
-                    LigtasAlert Admin
-                </div>
-                <div class="header-actions">
-                    <div class="facility-selector">
-                        <label for="facility">Facility:</label>
-                        <select id="facility">
-                            <option value="all">All Facilities</option>
-                        </select>
-                    </div>
-                    <div class="admin-profile-avatar" role="img" aria-label="Administrator profile picture for {{ $profileName }}" title="{{ $profileName }} ({{ $profileEmail }})">
-                        @if ($profilePhoto)
-                            <img src="{{ $profilePhoto }}" alt="" onerror="this.hidden = true; this.nextElementSibling.hidden = false;">
-                        @endif
-                        <span class="admin-profile-initials" @if ($profilePhoto) hidden @endif>{{ $profileInitials }}</span>
-                    </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <div class="nav-tabs">
-                <button class="nav-tab active" data-tab="dashboard"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; vertical-align: -0.125rem; margin-right: 0.35rem;"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Dashboard</button>
-                <button class="nav-tab" data-tab="contacts"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; vertical-align: -0.125rem; margin-right: 0.35rem;"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Contacts</button>
-                <button class="nav-tab" data-tab="history"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; vertical-align: -0.125rem; margin-right: 0.35rem;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>History</button>
-                <button class="nav-tab" data-tab="reports"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; vertical-align: -0.125rem; margin-right: 0.35rem;"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Reports</button>
+<header class="header">
+    <div class="topbar">
+        <div class="topbar-brand">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation menu" aria-controls="adminSidebar" aria-expanded="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <div class="header-title">
+                <img class="header-logo" src="{{ asset('assets/ligtasLOGO.png') }}" alt="">
+                <span>LigtasAlert</span>
             </div>
         </div>
+        <div class="header-actions">
+            <div class="facility-selector">
+                <label for="facility">Facility:</label>
+                <select id="facility">
+                    <option value="all">All Facilities</option>
+                </select>
+            </div>
+            <div class="admin-profile-info">
+                <div class="admin-profile-avatar" role="img" aria-label="Administrator profile picture for {{ $profileName }}" title="{{ $profileName }} ({{ $profileEmail }})">
+                    @if ($profilePhoto)
+                        <img src="{{ $profilePhoto }}" alt="" onerror="this.hidden = true; this.nextElementSibling.hidden = false;">
+                    @endif
+                    <span class="admin-profile-initials" @if ($profilePhoto) hidden @endif>{{ $profileInitials }}</span>
+                </div>
+                <span class="admin-profile-name">{{ $profileFirstName }}!</span>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn-logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
+</header>
 
-    <div class="container">
+<aside class="sidebar" id="adminSidebar" aria-label="Admin navigation">
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="dashboard" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg><span>Dashboard</span></button>
+        <div class="nav-section-label">Manage</div>
+        <button class="nav-tab" data-tab="contacts"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg><span>Contacts</span></button>
+        <button class="nav-tab" data-tab="history"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>History</span></button>
+        <button class="nav-tab" data-tab="reports"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg><span>Reports</span></button>
+    </nav>
+</aside>
+<button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+
+    <main class="container">
         <div id="dashboardTab" class="tab-content active">
+            <div class="page-heading"><h1>Dashboard</h1></div>
             <div class="stats-grid">
                 <div class="stat-card active">
                     <div class="stat-number" id="activeCount">-</div>
@@ -80,7 +93,7 @@
             </div>
 
             <div class="alerts-section">
-                <div class="section-title">Active Incidents</div>
+                <div class="panel-heading"><div class="section-title">Active Incidents</div><span class="live-badge" id="activeIncidentsBadge" hidden></span></div>
                 <div class="alerts-grid" id="alertsGrid">
                     <div class="loading">No active alerts</div>
                 </div>
@@ -95,6 +108,7 @@
         </div>
 
         <div id="contactsTab" class="tab-content" style="display: none;">
+            <div class="page-heading"><h1>Emergency Hotlines</h1></div>
             <svg class="contacts-icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                 <symbol id="contact-icon-heart-pulse" viewBox="0 0 24 24"><path d="M2 12h4l3-9 4 18 3-9h6"></path></symbol>
                 <symbol id="contact-icon-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h8l-1 8 11-12h-8l1-8z"></path></symbol>
@@ -327,8 +341,8 @@
         </div>
 
         <div id="historyTab" class="tab-content" style="display: none;">
+            <div class="page-heading"><h1>Resolved Incidents</h1></div>
             <div class="alerts-section">
-                <div class="section-title">Resolved Incidents</div>
                 <div class="alerts-grid history-grid" id="historyGrid">
                     <div class="loading">No resolved incidents</div>
                 </div>
@@ -336,8 +350,8 @@
         </div>
 
         <div id="reportsTab" class="tab-content" style="display: none;">
+            <div class="page-heading"><h1>Incident Reports</h1></div>
             <div class="reports-header">
-                <div class="section-title">Incident Reports</div>
                 <div class="reports-controls">
                     <input type="date" id="reportFrom" class="form-input" style="max-width:14rem;">
                     <input type="date" id="reportTo" class="form-input" style="max-width:14rem;">
@@ -382,5 +396,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 @endsection

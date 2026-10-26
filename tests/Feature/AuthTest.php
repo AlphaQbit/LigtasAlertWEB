@@ -161,18 +161,22 @@ class AuthTest extends TestCase
             ->get('/admin')
             ->assertOk()
             ->assertSee('AJ')
+            ->assertSee('<span class="admin-profile-name">Alex!</span>', false)
             ->assertSee('Administrator profile picture for Alex Johnson');
 
         $html = $response->getContent();
         $facilityPosition = strpos($html, 'class="facility-selector"');
         $avatarPosition = strpos($html, 'class="admin-profile-avatar"');
+        $firstNamePosition = strpos($html, '<span class="admin-profile-name">Alex!</span>');
         $logoutPosition = strpos($html, 'class="btn-logout"');
 
         $this->assertNotFalse($facilityPosition);
         $this->assertNotFalse($avatarPosition);
+        $this->assertNotFalse($firstNamePosition);
         $this->assertNotFalse($logoutPosition);
         $this->assertTrue($facilityPosition < $avatarPosition);
-        $this->assertTrue($avatarPosition < $logoutPosition);
+        $this->assertTrue($avatarPosition < $firstNamePosition);
+        $this->assertTrue($firstNamePosition < $logoutPosition);
     }
 
     public function test_microsoft_redirect_sends_user_to_provider(): void
