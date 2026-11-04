@@ -28,12 +28,8 @@
     <div class="auth-branding">
         <div class="radar" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="brand-logo">
-            <div class="brand-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 2.5 3.5 5.7v5.5c0 5.1 3.5 9.4 8.5 11.3 5-1.9 8.5-6.2 8.5-11.3V5.7L12 2.5Zm0 3.2 5.5 2.1v3.4c0 3.6-2.2 6.8-5.5 8.4-3.3-1.6-5.5-4.8-5.5-8.4V7.8L12 5.7Z"/>
-                </svg>
-            </div>
-            <h1 class="brand-title">LigtasAlert</h1>
+            <h1 class="brand-title"><span class="bt-light">Ligtas</span><span class="bt-accent">Alert</span></h1>
+            <span class="brand-badge"><i aria-hidden="true"></i>MCC System</span>
         </div>
 
         <div class="brand-copy">
@@ -57,8 +53,15 @@
                     <p class="tip">Follow the response team's instructions.<small>Move calmly and help others who need assistance.</small></p>
                 </div>
                 <div class="tip-foot">
+                    <button type="button" class="tip-nav" id="tip-prev" aria-label="Previous tip"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
                     <div class="tip-bar"><span></span></div>
-                    <div class="tip-dots" aria-hidden="true"><i class="is-active"></i><i></i><i></i><i></i></div>
+                    <div class="tip-dots">
+                        <button type="button" class="tip-dot is-active" aria-label="Tip 1"></button>
+                        <button type="button" class="tip-dot" aria-label="Tip 2"></button>
+                        <button type="button" class="tip-dot" aria-label="Tip 3"></button>
+                        <button type="button" class="tip-dot" aria-label="Tip 4"></button>
+                    </div>
+                    <button type="button" class="tip-nav" id="tip-next" aria-label="Next tip"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
                 </div>
             </div>
         </div>
@@ -229,7 +232,7 @@
 
         <p class="secure-note">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            Secure sign-in for MCC students and staff
+            Secure sign-in for MCC admin and staff
         </p>
 
         </div>
@@ -276,15 +279,25 @@ window.addEventListener('pageshow', function () {
     tick(); setInterval(tick, 15000);
 })();
 
-/* rotating safety tips */
+/* safety tips carousel: auto-rotate, arrows, dots, pause on hover */
 (function () {
-    var tips = document.querySelectorAll('.tip'), dots = document.querySelectorAll('.tip-dots i'), n = 0;
-    if (tips.length < 2) return;
-    setInterval(function () {
+    var card = document.querySelector('.tip-card');
+    if (!card) return;
+    var tips = card.querySelectorAll('.tip'), dots = card.querySelectorAll('.tip-dot'), bar = card.querySelector('.tip-bar span'), n = 0, timer;
+    function restartBar() { bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
+    function go(i) {
         tips[n].classList.remove('is-active'); dots[n].classList.remove('is-active');
-        n = (n + 1) % tips.length;
+        n = (i + tips.length) % tips.length;
         tips[n].classList.add('is-active'); dots[n].classList.add('is-active');
-    }, 6000);
+        restartBar();
+    }
+    function start() { clearInterval(timer); timer = setInterval(function () { go(n + 1); }, 6000); }
+    document.getElementById('tip-prev').addEventListener('click', function () { go(n - 1); start(); });
+    document.getElementById('tip-next').addEventListener('click', function () { go(n + 1); start(); });
+    dots.forEach(function (d, i) { d.addEventListener('click', function () { go(i); start(); }); });
+    card.addEventListener('mouseenter', function () { clearInterval(timer); });
+    card.addEventListener('mouseleave', function () { restartBar(); start(); });
+    start();
 })();
 
 /* caps-lock hint on the login password */
