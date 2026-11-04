@@ -9,7 +9,7 @@
     (function () {
         var t = null;
         try { t = localStorage.getItem('ligtas-theme'); } catch (e) {}
-        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        if (!t) t = 'dark';
         document.documentElement.setAttribute('data-theme', t);
     })();
     </script>
