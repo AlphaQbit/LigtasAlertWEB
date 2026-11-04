@@ -11,9 +11,16 @@ return [
     | device hitting your LAN address - so the browser needs permission to
     | call the alert API. Laravel's HandleCors middleware reads this file.
     |
-    | Alert endpoints are unauthenticated and send no credentials, so any
-    | origin is allowed. Narrow these paths if you add session or token auth
-    | in front of them.
+    | CORS is scoped to api/* only; the rescuer dashboard is same-origin and
+    | still relies on its session cookie, so it must stay out of this list.
+    |
+    | ALLOWED_ORIGINS is env-driven and REQUIRED in production. With the env
+    | unset, allowed_origins evaluates to an empty array and the CORS service
+    | rejects every origin - the rescuee app's calls are blocked by the browser.
+    | List the rescuee app's origin(s), comma-separated. Alerts carry no
+    | credentials (bearer tokens, no cookies), so supports_credentials stays
+    | false. Narrow these paths if you add session or token auth in front of
+    | them.
     |
     */
 
@@ -24,7 +31,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', ''))),
 
     'allowed_origins_patterns' => [],
 

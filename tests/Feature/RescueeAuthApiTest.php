@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
@@ -279,5 +280,160 @@ class RescueeAuthApiTest extends TestCase
                 'email' => 'rescuee@example.com',
                 'password' => 'wrong-password',
             ])->assertStatus(401);
+    }
+
+    /**
+     * Tokens issued through register, login, and Microsoft OAuth now carry a
+     * 30-day expiration. Existing tokens created without one are unaffected.
+     */
+    public function test_register_issues_token_with_30_day_expiration(): void
+    {
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Expiry Test',
+            'email' => 'expiry@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertCreated();
+        $token = $response->json('token');
+
+        $accessToken = PersonalAccessToken::findToken($token);
+        $this->assertNotNull($accessToken, 'Token should be findable via Sanctum lookup.');
+        $this->assertNotNull($accessToken->expires_at, 'New token should have an expiration.');
+        $this->assertEqualsWithDelta(
+            now()->addDays(30)->timestamp,
+            $accessToken->expires_at->timestamp,
+            10,
+            'Token expiration should be ~30 days from now.'
+        );
+    }
+
+    public function test_login_issues_token_with_30_day_expiration(): void
+    {
+        User::factory()->create([
+            'email' => 'login-expiry@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'login-expiry@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertOk();
+        $token = $response->json('token');
+
+        $accessToken = PersonalAccessToken::findToken($token);
+        $this->assertNotNull($accessToken);
+        $this->assertNotNull($accessToken->expires_at);
+        $this->assertEqualsWithDelta(
+            now()->addDays(30)->timestamp,
+            $accessToken->expires_at->timestamp,
+            10
+        );
+    }
+
+    public function test_microsoft_oauth_issues_token_with_30_day_expiration(): void
+    {
+        $start = $this->getJson('/api/auth/microsoft/start');
+        $start->assertOk();
+        $state = $start->json('state');
+
+        $socialiteUser = (new SocialiteUser)->setRaw([])->map([
+            'id' => 'microsoft-id-expiry',
+            'name' => 'OAuth Expiry',
+            'email' => 'oauth-expiry@example.com',
+        ]);
+        Socialite::shouldReceive('driver->stateless->redirectUrl->user')
+            ->andReturn($socialiteUser);
+
+        $this->getJson("/api/auth/microsoft/callback?state={$state}&code=the-code")
+            ->assertOk();
+
+        $finish = $this->getJson("/api/auth/microsoft/finish?state={$state}");
+        $finish->assertOk();
+        $token = $finish->json('token');
+
+        $accessToken = PersonalAccessToken::findToken($token);
+        $this->assertNotNull($accessToken);
+        $this->assertNotNull($accessToken->expires_at);
+        $this->assertEqualsWithDelta(
+            now()->addDays(30)->timestamp,
+            $accessToken->expires_at->timestamp,
+            10
+        );
+    }
+
+    /**
+     * Tokens created before the 30-day policy (no expiration argument) remain
+     * valid because the global Sanctum expiration config is still null.
+     */
+    public function test_existing_token_without_expiration_remains_valid(): void
+    {
+        $user = User::factory()->create();
+
+        $oldToken = $user->createToken('mobile')->plainTextToken;
+        $oldAccessToken = PersonalAccessToken::findToken($oldToken);
+        $this->assertNotNull($oldAccessToken);
+        $this->assertNull($oldAccessToken->expires_at, 'Pre-policy token should have no expiration.');
+
+        $this->withToken($oldToken)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.id', $user->id);
+    }
+
+    /**
+     * Microsoft OAuth start endpoint is rate-limited at 5 requests/min/IP.
+     */
+    public function test_microsoft_oauth_start_is_rate_limited(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->getJson('/api/auth/microsoft/start')->assertOk();
+        }
+
+        $this->getJson('/api/auth/microsoft/start')->assertStatus(429);
+    }
+
+    /**
+     * Microsoft OAuth callback is rate-limited at 5 requests/min/IP.
+     */
+    public function test_microsoft_oauth_callback_is_rate_limited(): void
+    {
+        // Exhaust the limit with start requests (same limiter, same IP bucket)
+        for ($i = 0; $i < 5; $i++) {
+            $this->getJson('/api/auth/microsoft/start')->assertOk();
+        }
+
+        // callback should now be rate limited
+        $this->getJson('/api/auth/microsoft/callback?state=unknown&code=x')
+            ->assertStatus(429);
+    }
+
+    /**
+     * A normal mocked Microsoft OAuth flow still works with throttling active.
+     */
+    public function test_normal_microsoft_flow_works_with_throttling(): void
+    {
+        $start = $this->getJson('/api/auth/microsoft/start');
+        $start->assertOk();
+        $state = $start->json('state');
+
+        $socialiteUser = (new SocialiteUser)->setRaw([])->map([
+            'id' => 'microsoft-id-flow',
+            'name' => 'Flow Test',
+            'email' => 'flow@example.com',
+        ]);
+        Socialite::shouldReceive('driver->stateless->redirectUrl->user')
+            ->andReturn($socialiteUser);
+
+        $this->getJson("/api/auth/microsoft/callback?state={$state}&code=the-code")
+            ->assertOk();
+
+        $finish = $this->getJson("/api/auth/microsoft/finish?state={$state}");
+        $finish->assertOk()
+            ->assertJsonStructure(['user', 'token'])
+            ->assertJsonPath('user.email', 'flow@example.com');
     }
 }

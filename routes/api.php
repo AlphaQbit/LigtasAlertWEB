@@ -19,9 +19,12 @@ Route::post('/auth/register', [MobileAuthController::class, 'register'])
     ->middleware('throttle:register');
 Route::post('/auth/login', [MobileAuthController::class, 'login'])
     ->middleware('throttle:login');
-Route::get('/auth/microsoft/start', [MobileAuthController::class, 'microsoftStart']);
-Route::get('/auth/microsoft/callback', [MobileAuthController::class, 'microsoftCallback']);
-Route::get('/auth/microsoft/finish', [MobileAuthController::class, 'microsoftFinish']);
+Route::get('/auth/microsoft/start', [MobileAuthController::class, 'microsoftStart'])
+    ->middleware('throttle:oauth');
+Route::get('/auth/microsoft/callback', [MobileAuthController::class, 'microsoftCallback'])
+    ->middleware('throttle:oauth');
+Route::get('/auth/microsoft/finish', [MobileAuthController::class, 'microsoftFinish'])
+    ->middleware('throttle:oauth');
 Route::get('/auth/me', [MobileAuthController::class, 'me'])->middleware('auth:sanctum');
 Route::post('/auth/logout', [MobileAuthController::class, 'logout'])->middleware('auth:sanctum');
 

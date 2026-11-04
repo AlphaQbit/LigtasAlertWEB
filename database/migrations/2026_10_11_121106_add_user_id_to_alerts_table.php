@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::table('alerts', function (Blueprint $table) {
             $table->foreignId('user_id')
                 ->constrained()
-                ->cascadeOnDelete()
-                ->after('id');
+                ->cascadeOnDelete();
+
             $table->index(['user_id', 'created_at']);
         });
     }
@@ -26,8 +26,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('alerts', function (Blueprint $table) {
-            $table->dropForeignIdForUser();
+            $table->dropForeign(['user_id']);
             $table->dropIndex(['user_id', 'created_at']);
+            $table->dropColumn('user_id');
         });
     }
 };

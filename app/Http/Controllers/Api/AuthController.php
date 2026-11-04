@@ -142,6 +142,13 @@ class AuthController extends Controller
             ]);
         }
 
+        // Consume the state as soon as the exchange succeeds. A failed
+        // exchange leaves it in place so the user can retry; a reused state
+        // is rejected by the check above. Sequential replay protection —
+        // get+forget is not atomic, so a truly concurrent double-callback
+        // could both pass the check before either forgets.
+        cache()->forget("microsoft_state_{$state}");
+
         $email = $microsoftUser->getEmail();
 
         if (! $email) {
@@ -158,7 +165,7 @@ class AuthController extends Controller
             ],
         );
 
-        $token = $user->createToken('mobile')->plainTextToken;
+        $token = $user->createToken('mobile', ['*'], now()->addDays(30))->plainTextToken;
         cache()->put("microsoft_token_{$state}", $token, now()->addMinutes(10));
 
         return view('auth.microsoft_done', [
@@ -201,7 +208,7 @@ class AuthController extends Controller
 
     private function tokenResponse(User $user, int $status = 200): JsonResponse
     {
-        $token = $user->createToken('mobile')->plainTextToken;
+        $token = $user->createToken('mobile', ['*'], now()->addDays(30))->plainTextToken;
 
         return response()->json(['user' => $user, 'token' => $token], $status);
     }

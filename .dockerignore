@@ -1,0 +1,47 @@
+# Mirror of .gitignore plus build-context exclusions (audit R2).
+# /public/build is DELIBERATELY kept — it is the Vite manifest produced by
+# `npm run build` in the Dockerfile and must ship in the image.
+
+/.git
+/.opencode
+/.agents
+/.claude
+/.codex
+/.kilo
+/.idea
+/.vscode
+/.zed
+/.cursor
+/.nova
+/.phpactor.json
+
+/node_modules
+/vendor
+
+/public/hot
+/public/storage
+
+/storage
+/bootstrap/cache
+
+/database/database.sqlite
+/database/*.sqlite
+
+*.log
+.DS_Store
+Thumbs.db
+
+.env
+.env.*
+.env.backup
+.env.production
+Homestead.json
+Homestead.yaml
+auth.json
+.phpunit.result.cache
+/.phpunit.cache
+/.codex
+_ide_helper.php
+
+/tests
+/debug_test.php

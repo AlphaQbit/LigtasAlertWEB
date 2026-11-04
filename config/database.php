@@ -96,7 +96,11 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // 'prefer' (framework default) allows a cleartext fallback if TLS
+            // fails. Supabase is remote and untrusted, so production defaults
+            // to 'require' to enforce TLS. Use 'verify-full' only with a CA
+            // bundle supplied via DB_SSLROOTCERT or the PDO sslrootcert option.
+            'sslmode' => env('DB_SSLMODE', 'require'),
         ],
 
         'sqlsrv' => [

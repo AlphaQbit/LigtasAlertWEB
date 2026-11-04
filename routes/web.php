@@ -11,8 +11,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.store')->mi
 Route::post('/register', [AuthController::class, 'register'])->name('register.store')->middleware('throttle:register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/auth/microsoft/redirect', [AuthController::class, 'microsoftRedirect'])->name('microsoft.redirect');
-Route::get('/auth/microsoft/callback', [AuthController::class, 'microsoftCallback'])->name('microsoft.callback');
+Route::get('/auth/microsoft/redirect', [AuthController::class, 'microsoftRedirect'])
+    ->middleware('throttle:oauth')
+    ->name('microsoft.redirect');
+Route::get('/auth/microsoft/callback', [AuthController::class, 'microsoftCallback'])
+    ->middleware('throttle:oauth')
+    ->name('microsoft.callback');
 
 Route::view('/admin', 'admin')->middleware('auth')->name('admin');
 
