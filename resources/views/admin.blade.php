@@ -93,153 +93,155 @@
                 </div>
             </div>
         </div>
-
-                {{-- Replace the WHOLE <div id="contactsTab" ...> ... </div> block (everything up to, but not including, <div id="historyTab">) --}}
-                @php
-                    // Put photos/logos in public/assets/contacts/ using the file names below (.jpg). Missing file = coloured name panel.
-                    $hotlines = [
-                        ['cat' => 'medical',   'label' => 'MGA',    'img' => 'mga-center', 'name' => 'MGA Center', 'type' => 'Medical Emergency Hotline',            'tag' => 'Medical',   'search' => 'mga center emergency hotline medical ambulance',                'numbers' => ['0919-242-6041']],
-                        ['cat' => 'utilities', 'label' => 'PELCO',  'img' => 'pelco-ii',   'name' => 'PELCO II',   'type' => 'Electric Cooperative',                  'tag' => 'Utilities', 'search' => 'pelco ii electric cooperative power electricity utility',       'numbers' => ['0919-059-0423']],
-                        ['cat' => 'disaster',  'label' => 'CDRRMO', 'img' => 'cdrrmo',     'name' => 'CDRRMO',     'type' => 'Disaster Risk Reduction and Management', 'tag' => 'Disaster',  'search' => 'cdrrmo disaster risk reduction management rescue disaster response', 'numbers' => ['0927-611-7634']],
-                        ['cat' => 'security',  'label' => 'PNP',    'img' => 'pnp',        'name' => 'PNP',        'type' => 'Philippine National Police',            'tag' => 'Security',  'search' => 'pnp philippine national police security police',             'numbers' => ['0998-967-3262', '0948-552-4384']],
-                        ['cat' => 'fire',      'label' => 'BFP',    'img' => 'bfp',        'name' => 'BFP',        'type' => 'Bureau of Fire Protection',             'tag' => 'Fire',      'search' => 'bfp bureau fire protection fire',                            'numbers' => ['0933-990-9960', '0963-363-6212']],
-                    ];
-                    $guides = [
-                        ['tone' => 'fire',     'title' => 'Fire outbreak',                'call' => 'Call BFP',       'steps' => ['Warn people nearby and leave using the nearest safe exit.', 'Stay low under smoke and do not use elevators.', 'Call BFP from a safe location. Never re-enter a burning building.']],
-                        ['tone' => 'utility',  'title' => 'Power interruption or hazard', 'call' => 'Call PELCO II',  'steps' => ['Stay clear of downed wires and damaged electrical equipment.', 'Keep others away from the hazard and move to a safe location.', 'Call PELCO II to report the outage or electrical danger.']],
-                        ['tone' => 'medical',  'title' => 'Medical emergency',            'call' => 'Call MGA Center','steps' => ['Check that the scene is safe before approaching.', 'Call MGA Center and share your exact location and the person’s condition.', 'Follow the dispatcher’s instructions; avoid moving someone with a serious injury.']],
-                        ['tone' => 'security', 'title' => 'Security threat',              'call' => 'Call PNP',       'steps' => ['Move away from danger and avoid confronting the threat.', 'Call PNP when safe and share your location and observations.', 'Follow directions from emergency responders.']],
-                        ['tone' => 'disaster', 'title' => 'Disaster or evacuation',       'call' => 'Call CDRRMO',    'steps' => ['Follow official evacuation instructions and use marked safe routes.', 'Bring essential medication and keep family members together.', 'Call CDRRMO for local disaster assistance or rescue.']],
-                    ];
-                @endphp
-                <div id="contactsTab" class="tab-content" style="display: none;">
-                    <div class="alerts-section">
-                        <div class="contacts-header">
-                            <div>
-                                <div class="section-title">Mabalacat City Emergency Hotlines</div>
-                                <p class="contacts-description">Find the right local team and call directly for help.</p>
-                            </div>
-                            <div class="contacts-controls">
-                                <label class="contacts-category-field" for="contactCategory">
-                                    <span>Category</span>
-                                    <select id="contactCategory" class="contacts-filter">
-                                        <option value="all">All categories</option>
-                                        <option value="medical">Medical</option>
-                                        <option value="security">Security</option>
-                                        <option value="utilities">Utilities</option>
-                                        <option value="disaster">Disaster</option>
-                                        <option value="fire">Fire</option>
-                                    </select>
-                                </label>
-                            </div>
+        
+            {{-- Replace the WHOLE <div id="contactsTab" ...> ... </div> block (everything up to, but not including, <div id="historyTab">) --}}
+            @php
+                // Put photos/logos in public/assets/contacts/ using the file names below (.jpg). Missing file = coloured name panel.
+                $hotlines = [
+                    ['cat' => 'medical',   'label' => 'MGA',    'img' => 'mga-center', 'name' => 'MGA Center', 'type' => 'Medical Emergency Hotline',             'tag' => 'Medical',   'uses' => ['Ambulance', 'Injuries', 'Sudden illness'],            'search' => 'mga center emergency hotline medical ambulance',                       'numbers' => ['0919-242-6041']],
+                    ['cat' => 'utilities', 'label' => 'PELCO',  'img' => 'pelco-ii',   'name' => 'PELCO II',   'type' => 'Electric Cooperative',                   'tag' => 'Utilities', 'uses' => ['Power outage', 'Downed wires', 'Electrical hazard'],  'search' => 'pelco ii electric cooperative power electricity utility',              'numbers' => ['0919-059-0423']],
+                    ['cat' => 'disaster',  'label' => 'CDRRMO', 'img' => 'cdrrmo',     'name' => 'CDRRMO',     'type' => 'Disaster Risk Reduction and Management', 'tag' => 'Disaster',  'uses' => ['Rescue', 'Evacuation', 'Disaster response'],          'search' => 'cdrrmo disaster risk reduction management rescue disaster response',  'numbers' => ['0927-611-7634']],
+                    ['cat' => 'security',  'label' => 'PNP',    'img' => 'pnp',        'name' => 'PNP',        'type' => 'Philippine National Police',             'tag' => 'Security',  'uses' => ['Crime', 'Threats', 'Public safety'],                  'search' => 'pnp philippine national police security police',                      'numbers' => ['0998-967-3262', '0948-552-4384']],
+                    ['cat' => 'fire',      'label' => 'BFP',    'img' => 'bfp',        'name' => 'BFP',        'type' => 'Bureau of Fire Protection',              'tag' => 'Fire',      'uses' => ['Fire outbreak', 'Smoke or burning', 'Fire rescue'],   'search' => 'bfp bureau fire protection fire',                                     'numbers' => ['0933-990-9960', '0963-363-6212']],
+                ];
+                $guides = [
+                    ['tone' => 'fire',     'title' => 'Fire outbreak',                'call' => 'Call BFP',       'steps' => ['Warn people nearby and leave using the nearest safe exit.', 'Stay low under smoke and do not use elevators.', 'Call BFP from a safe location. Never re-enter a burning building.']],
+                    ['tone' => 'utility',  'title' => 'Power interruption or hazard', 'call' => 'Call PELCO II',  'steps' => ['Stay clear of downed wires and damaged electrical equipment.', 'Keep others away from the hazard and move to a safe location.', 'Call PELCO II to report the outage or electrical danger.']],
+                    ['tone' => 'medical',  'title' => 'Medical emergency',            'call' => 'Call MGA Center','steps' => ['Check that the scene is safe before approaching.', 'Call MGA Center and share your exact location and the person’s condition.', 'Follow the dispatcher’s instructions; avoid moving someone with a serious injury.']],
+                    ['tone' => 'security', 'title' => 'Security threat',              'call' => 'Call PNP',       'steps' => ['Move away from danger and avoid confronting the threat.', 'Call PNP when safe and share your location and observations.', 'Follow directions from emergency responders.']],
+                    ['tone' => 'disaster', 'title' => 'Disaster or evacuation',       'call' => 'Call CDRRMO',    'steps' => ['Follow official evacuation instructions and use marked safe routes.', 'Bring essential medication and keep family members together.', 'Call CDRRMO for local disaster assistance or rescue.']],
+                ];
+            @endphp
+            <div id="contactsTab" class="tab-content" style="display: none;">
+                <div class="alerts-section">
+                    <div class="contacts-header">
+                        <div>
+                            <div class="section-title">Mabalacat City Emergency Hotlines</div>
+                            <p class="contacts-description">Find the right local team and call directly for help.</p>
                         </div>
-
-                        <div class="responder-grid" id="responderGrid">
-                            @foreach ($hotlines as $h)
-                            <section class="responder-card" data-category="{{ $h['cat'] }}" data-search="{{ $h['search'] }}">
-                                <div class="responder-photo" data-label="{{ $h['label'] }}">
-                                    <img src="{{ asset('assets/contacts/' . $h['img'] . '.jpg') }}" alt="{{ $h['name'] }}" loading="lazy" onerror="this.parentNode.classList.add('no-photo'); this.remove();">
-                                    <span class="responder-tag">{{ $h['tag'] }}</span>
-                                </div>
-                                <div class="responder-body">
-                                    <div class="responder-heading">
-                                        <div class="responder-info">
-                                            <h3 class="responder-name">{{ $h['name'] }}</h3>
-                                            <p class="responder-type">{{ $h['type'] }}</p>
-                                        </div>
-                                    </div>
-                                    <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                                    <div class="responder-numbers">
-                                        @foreach ($h['numbers'] as $n)
-                                        @php $tel = '+63' . substr(preg_replace('/\D/', '', $n), 1); @endphp
-                                        <div class="responder-number-row">
-                                            <a class="responder-phone" href="tel:{{ $tel }}">{{ $n }}</a>
-                                            <a class="contact-action contact-call" href="tel:{{ $tel }}">Call Now</a>
-                                            <button class="contact-action contact-copy" type="button" data-copy-number="{{ $n }}">Copy Number</button>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </section>
-                            @endforeach
+                        <div class="contacts-controls">
+                            <label class="contacts-category-field" for="contactCategory">
+                                <span>Category</span>
+                                <select id="contactCategory" class="contacts-filter">
+                                    <option value="all">All categories</option>
+                                    <option value="medical">Medical</option>
+                                    <option value="security">Security</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="disaster">Disaster</option>
+                                    <option value="fire">Fire</option>
+                                </select>
+                            </label>
                         </div>
-                        <p class="contacts-empty" id="contactsEmpty" role="status" hidden>No hotlines in this category.</p>
                     </div>
 
-                    <section class="guidelines-section" aria-labelledby="guidelinesTitle">
-                        <div class="guidelines-heading">
-                            <div>
-                                <h2 class="section-title" id="guidelinesTitle">Emergency Action Guidelines</h2>
-                                <p class="contacts-description">A quick reference while help is on the way.</p>
+                    <div class="responder-grid" id="responderGrid">
+                        @foreach ($hotlines as $h)
+                        <section class="responder-card" data-category="{{ $h['cat'] }}" data-search="{{ $h['search'] }}">
+                            <div class="responder-photo" data-label="{{ $h['label'] }}">
+                                <img src="{{ asset('assets/contacts/' . $h['img'] . '.jpg') }}" alt="{{ $h['name'] }}" loading="lazy" onerror="this.parentNode.classList.add('no-photo'); this.remove();">
+                                <span class="responder-tag">{{ $h['tag'] }}</span>
                             </div>
-                            <span class="guidelines-note">Stay calm. Stay safe.</span>
-                        </div>
-                        <div class="guidelines-grid">
-                            @foreach ($guides as $g)
-                            <details class="guideline-card tone-{{ $g['tone'] }}">
-                                <summary><span class="guideline-title">{{ $g['title'] }} <small>{{ $g['call'] }}</small></span></summary>
-                                <div class="guideline-content"><ol>@foreach ($g['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol></div>
-                            </details>
-                            @endforeach
-                        </div>
-                    </section>
+                            <div class="responder-body">
+                                <div class="responder-heading">
+                                    <div class="responder-info">
+                                        <h3 class="responder-name">{{ $h['name'] }}</h3>
+                                        <p class="responder-type">{{ $h['type'] }}</p>
+                                    </div>
+                                </div>
+                                <div class="responder-uses">
+                                    <span class="responder-uses-label">Call for</span>
+                                    <ul>@foreach ($h['uses'] as $use)<li>{{ $use }}</li>@endforeach</ul>
+                                </div>
+                                <div class="responder-numbers">
+                                    @foreach ($h['numbers'] as $n)
+                                    @php $tel = '+63' . substr(preg_replace('/\D/', '', $n), 1); @endphp
+                                    <div class="responder-number-row">
+                                        <a class="responder-phone" href="tel:{{ $tel }}"><small>Tap to call</small>{{ $n }}</a>
+                                        <button class="contact-action contact-copy" type="button" data-copy-number="{{ $n }}">Copy</button>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </section>
+                        @endforeach
+                    </div>
+                    <p class="contacts-empty" id="contactsEmpty" role="status" hidden>No hotlines in this category.</p>
+                </div>
 
-                    <section class="contacts-admin-actions" aria-label="Contact administration">
+                <section class="guidelines-section" aria-labelledby="guidelinesTitle">
+                    <div class="guidelines-heading">
                         <div>
-                            <h2>Keep hotline information current (TEST ONLY)</h2>
-                            <p>Flag a number that needs checking or prepare a contact suggestion.</p>
+                            <h2 class="section-title" id="guidelinesTitle">Emergency Action Guidelines</h2>
+                            <p class="contacts-description">A quick reference while help is on the way.</p>
                         </div>
-                        <div class="contacts-admin-buttons">
-                            <button class="contacts-secondary-button" type="button" data-open-contact-dialog="reportHotlineDialog">Report unresponsive hotline</button>
-                            <button class="contacts-primary-button" type="button" data-open-contact-dialog="addContactDialog">Add custom contact</button>
-                        </div>
-                        <p class="contacts-demo-note">Admin actions are a preview only; changes are not saved or submitted.</p>
-                    </section>
+                        <span class="guidelines-note">Stay calm. Stay safe.</span>
+                    </div>
+                    <div class="guidelines-grid">
+                        @foreach ($guides as $g)
+                        <details class="guideline-card tone-{{ $g['tone'] }}">
+                            <summary><span class="guideline-title">{{ $g['title'] }} <small>{{ $g['call'] }}</small></span></summary>
+                            <div class="guideline-content"><ol>@foreach ($g['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol></div>
+                        </details>
+                        @endforeach
+                    </div>
+                </section>
 
-                    <dialog class="contacts-dialog" id="reportHotlineDialog" aria-labelledby="reportHotlineTitle">
-                        <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
-                        <div class="contacts-dialog-heading">
-                            <div><h2 id="reportHotlineTitle">Report an unresponsive hotline</h2><p>Prepare a note for the admin team.</p></div>
-                        </div>
-                        <form method="dialog" class="contacts-dialog-form" data-preview-form="report">
-                            <label for="reportHotline">Hotline</label>
-                            <select id="reportHotline" name="hotline" required>
-                                <option value="">Choose a hotline</option>
-                                <option>MGA Center - 0919-242-6041</option>
-                                <option>PELCO II - 0919-059-0423</option>
-                                <option>CDRRMO - 0927-611-7634</option>
-                                <option>PNP - 0998-967-3262</option>
-                                <option>PNP - 0948-552-4384</option>
-                                <option>BFP - 0933-990-9960</option>
-                                <option>BFP - 0963-363-6212</option>
-                            </select>
-                            <label for="reportDetails">What happened?</label>
-                            <textarea id="reportDetails" name="details" rows="3" placeholder="Add a short note" required></textarea>
-                            <p class="contacts-dialog-notice" role="status">Preview only. This report will not be sent or stored.</p>
-                            <button class="contacts-primary-button" type="submit">Preview report</button>
-                        </form>
-                    </dialog>
+                <section class="contacts-admin-actions" aria-label="Contact administration">
+                    <div>
+                        <h2>Keep hotline information current (TEST ONLY)</h2>
+                        <p>Flag a number that needs checking or prepare a contact suggestion.</p>
+                    </div>
+                    <div class="contacts-admin-buttons">
+                        <button class="contacts-secondary-button" type="button" data-open-contact-dialog="reportHotlineDialog">Report unresponsive hotline</button>
+                        <button class="contacts-primary-button" type="button" data-open-contact-dialog="addContactDialog">Add custom contact</button>
+                    </div>
+                    <p class="contacts-demo-note">Admin actions are a preview only; changes are not saved or submitted.</p>
+                </section>
 
-                    <dialog class="contacts-dialog" id="addContactDialog" aria-labelledby="addContactTitle">
-                        <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
-                        <div class="contacts-dialog-heading">
-                            <div><h2 id="addContactTitle">Suggest a custom contact</h2><p>Preview the contact details before sharing with your team.</p></div>
-                        </div>
-                        <form method="dialog" class="contacts-dialog-form" data-preview-form="contact">
-                            <label for="customContactName">Contact or agency name</label>
-                            <input id="customContactName" name="name" type="text" maxlength="100" placeholder="e.g. Community Rescue Team" required>
-                            <label for="customContactPhone">Phone number</label>
-                            <input id="customContactPhone" name="phone" type="tel" maxlength="24" placeholder="e.g. 09XX-XXX-XXXX" required>
-                            <label for="customContactCategory">Category</label>
-                            <select id="customContactCategory" name="category" required>
-                                <option value="">Choose a category</option>
-                                <option>Medical</option><option>Security</option><option>Utilities</option><option>Disaster</option><option>Other</option>
-                            </select>
-                            <p class="contacts-dialog-notice" role="status">Preview only. This contact will not be saved or added to the hotline list.</p>
-                            <button class="contacts-primary-button" type="submit">Preview contact</button>
-                        </form>
-                    </dialog>
-                </div>  
+                <dialog class="contacts-dialog" id="reportHotlineDialog" aria-labelledby="reportHotlineTitle">
+                    <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
+                    <div class="contacts-dialog-heading">
+                        <div><h2 id="reportHotlineTitle">Report an unresponsive hotline</h2><p>Prepare a note for the admin team.</p></div>
+                    </div>
+                    <form method="dialog" class="contacts-dialog-form" data-preview-form="report">
+                        <label for="reportHotline">Hotline</label>
+                        <select id="reportHotline" name="hotline" required>
+                            <option value="">Choose a hotline</option>
+                            <option>MGA Center - 0919-242-6041</option>
+                            <option>PELCO II - 0919-059-0423</option>
+                            <option>CDRRMO - 0927-611-7634</option>
+                            <option>PNP - 0998-967-3262</option>
+                            <option>PNP - 0948-552-4384</option>
+                            <option>BFP - 0933-990-9960</option>
+                            <option>BFP - 0963-363-6212</option>
+                        </select>
+                        <label for="reportDetails">What happened?</label>
+                        <textarea id="reportDetails" name="details" rows="3" placeholder="Add a short note" required></textarea>
+                        <p class="contacts-dialog-notice" role="status">Preview only. This report will not be sent or stored.</p>
+                        <button class="contacts-primary-button" type="submit">Preview report</button>
+                    </form>
+                </dialog>
+
+                <dialog class="contacts-dialog" id="addContactDialog" aria-labelledby="addContactTitle">
+                    <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
+                    <div class="contacts-dialog-heading">
+                        <div><h2 id="addContactTitle">Suggest a custom contact</h2><p>Preview the contact details before sharing with your team.</p></div>
+                    </div>
+                    <form method="dialog" class="contacts-dialog-form" data-preview-form="contact">
+                        <label for="customContactName">Contact or agency name</label>
+                        <input id="customContactName" name="name" type="text" maxlength="100" placeholder="e.g. Community Rescue Team" required>
+                        <label for="customContactPhone">Phone number</label>
+                        <input id="customContactPhone" name="phone" type="tel" maxlength="24" placeholder="e.g. 09XX-XXX-XXXX" required>
+                        <label for="customContactCategory">Category</label>
+                        <select id="customContactCategory" name="category" required>
+                            <option value="">Choose a category</option>
+                            <option>Medical</option><option>Security</option><option>Utilities</option><option>Disaster</option><option>Other</option>
+                        </select>
+                        <p class="contacts-dialog-notice" role="status">Preview only. This contact will not be saved or added to the hotline list.</p>
+                        <button class="contacts-primary-button" type="submit">Preview contact</button>
+                    </form>
+                </dialog>
+            </div>
 
         <div id="historyTab" class="tab-content" style="display: none;">
             <div class="alerts-section">
