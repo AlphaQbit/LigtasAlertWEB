@@ -94,237 +94,152 @@
             </div>
         </div>
 
-        <div id="contactsTab" class="tab-content" style="display: none;">
-            <svg class="contacts-icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <symbol id="contact-icon-heart-pulse" viewBox="0 0 24 24"><path d="M2 12h4l3-9 4 18 3-9h6"></path></symbol>
-                <symbol id="contact-icon-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h8l-1 8 11-12h-8l1-8z"></path></symbol>
-                <symbol id="contact-icon-shield-plus" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></symbol>
-                <symbol id="contact-icon-shield-check" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path><path d="m9 12 2 2 4-4"></path></symbol>
-                <symbol id="contact-icon-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.5 1-3 3.5-3 5.5a6 6 0 0 0 12 0c0-4-2.5-7-5-9-.5 3-2 4-2 6a2.5 2.5 0 0 1-1 2Z"></path></symbol>
-                <symbol id="contact-icon-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72l.45 2.98a2 2 0 0 1-.57 1.68L7.7 9.67a16 16 0 0 0 6 6l1.29-1.29a2 2 0 0 1 1.68-.57l2.98.45A2 2 0 0 1 22 16.92Z"></path></symbol>
-                <symbol id="contact-icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></symbol>
-                <symbol id="contact-icon-book-open-check" viewBox="0 0 24 24"><path d="M12 7v14"></path><path d="M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4 4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v8"></path><path d="M3 18a2 2 0 0 0 2 2h3a4 4 0 0 1 4 1"></path><path d="m16 19 2 2 4-4"></path></symbol>
-                <symbol id="contact-icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></symbol>
-                <symbol id="contact-icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
-                <symbol id="contact-icon-shield-alert" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></symbol>
-                <symbol id="contact-icon-triangle-alert" viewBox="0 0 24 24"><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol>
-                <symbol id="contact-icon-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></symbol>
-                <symbol id="contact-icon-x" viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></symbol>
-            </svg>
-            <div class="alerts-section">
-                <div class="contacts-header">
-                    <div>
-                        <div class="section-title">Mabalacat City Emergency Hotlines</div>
-                        <p class="contacts-description">Find the right local team and call directly for help.</p>
+                {{-- Replace the WHOLE <div id="contactsTab" ...> ... </div> block (everything up to, but not including, <div id="historyTab">) --}}
+                @php
+                    // Put photos/logos in public/assets/contacts/ using the file names below (.jpg). Missing file = coloured name panel.
+                    $hotlines = [
+                        ['cat' => 'medical',   'label' => 'MGA',    'img' => 'mga-center', 'name' => 'MGA Center', 'type' => 'Medical Emergency Hotline',            'tag' => 'Medical',   'search' => 'mga center emergency hotline medical ambulance',                'numbers' => ['0919-242-6041']],
+                        ['cat' => 'utilities', 'label' => 'PELCO',  'img' => 'pelco-ii',   'name' => 'PELCO II',   'type' => 'Electric Cooperative',                  'tag' => 'Utilities', 'search' => 'pelco ii electric cooperative power electricity utility',       'numbers' => ['0919-059-0423']],
+                        ['cat' => 'disaster',  'label' => 'CDRRMO', 'img' => 'cdrrmo',     'name' => 'CDRRMO',     'type' => 'Disaster Risk Reduction and Management', 'tag' => 'Disaster',  'search' => 'cdrrmo disaster risk reduction management rescue disaster response', 'numbers' => ['0927-611-7634']],
+                        ['cat' => 'security',  'label' => 'PNP',    'img' => 'pnp',        'name' => 'PNP',        'type' => 'Philippine National Police',            'tag' => 'Security',  'search' => 'pnp philippine national police security police',             'numbers' => ['0998-967-3262', '0948-552-4384']],
+                        ['cat' => 'fire',      'label' => 'BFP',    'img' => 'bfp',        'name' => 'BFP',        'type' => 'Bureau of Fire Protection',             'tag' => 'Fire',      'search' => 'bfp bureau fire protection fire',                            'numbers' => ['0933-990-9960', '0963-363-6212']],
+                    ];
+                    $guides = [
+                        ['tone' => 'fire',     'title' => 'Fire outbreak',                'call' => 'Call BFP',       'steps' => ['Warn people nearby and leave using the nearest safe exit.', 'Stay low under smoke and do not use elevators.', 'Call BFP from a safe location. Never re-enter a burning building.']],
+                        ['tone' => 'utility',  'title' => 'Power interruption or hazard', 'call' => 'Call PELCO II',  'steps' => ['Stay clear of downed wires and damaged electrical equipment.', 'Keep others away from the hazard and move to a safe location.', 'Call PELCO II to report the outage or electrical danger.']],
+                        ['tone' => 'medical',  'title' => 'Medical emergency',            'call' => 'Call MGA Center','steps' => ['Check that the scene is safe before approaching.', 'Call MGA Center and share your exact location and the person’s condition.', 'Follow the dispatcher’s instructions; avoid moving someone with a serious injury.']],
+                        ['tone' => 'security', 'title' => 'Security threat',              'call' => 'Call PNP',       'steps' => ['Move away from danger and avoid confronting the threat.', 'Call PNP when safe and share your location and observations.', 'Follow directions from emergency responders.']],
+                        ['tone' => 'disaster', 'title' => 'Disaster or evacuation',       'call' => 'Call CDRRMO',    'steps' => ['Follow official evacuation instructions and use marked safe routes.', 'Bring essential medication and keep family members together.', 'Call CDRRMO for local disaster assistance or rescue.']],
+                    ];
+                @endphp
+                <div id="contactsTab" class="tab-content" style="display: none;">
+                    <div class="alerts-section">
+                        <div class="contacts-header">
+                            <div>
+                                <div class="section-title">Mabalacat City Emergency Hotlines</div>
+                                <p class="contacts-description">Find the right local team and call directly for help.</p>
+                            </div>
+                            <div class="contacts-controls">
+                                <label class="contacts-category-field" for="contactCategory">
+                                    <span>Category</span>
+                                    <select id="contactCategory" class="contacts-filter">
+                                        <option value="all">All categories</option>
+                                        <option value="medical">Medical</option>
+                                        <option value="security">Security</option>
+                                        <option value="utilities">Utilities</option>
+                                        <option value="disaster">Disaster</option>
+                                        <option value="fire">Fire</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="responder-grid" id="responderGrid">
+                            @foreach ($hotlines as $h)
+                            <section class="responder-card" data-category="{{ $h['cat'] }}" data-search="{{ $h['search'] }}">
+                                <div class="responder-photo" data-label="{{ $h['label'] }}">
+                                    <img src="{{ asset('assets/contacts/' . $h['img'] . '.jpg') }}" alt="{{ $h['name'] }}" loading="lazy" onerror="this.parentNode.classList.add('no-photo'); this.remove();">
+                                    <span class="responder-tag">{{ $h['tag'] }}</span>
+                                </div>
+                                <div class="responder-body">
+                                    <div class="responder-heading">
+                                        <div class="responder-info">
+                                            <h3 class="responder-name">{{ $h['name'] }}</h3>
+                                            <p class="responder-type">{{ $h['type'] }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
+                                    <div class="responder-numbers">
+                                        @foreach ($h['numbers'] as $n)
+                                        @php $tel = '+63' . substr(preg_replace('/\D/', '', $n), 1); @endphp
+                                        <div class="responder-number-row">
+                                            <a class="responder-phone" href="tel:{{ $tel }}">{{ $n }}</a>
+                                            <a class="contact-action contact-call" href="tel:{{ $tel }}">Call Now</a>
+                                            <button class="contact-action contact-copy" type="button" data-copy-number="{{ $n }}">Copy Number</button>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </section>
+                            @endforeach
+                        </div>
+                        <p class="contacts-empty" id="contactsEmpty" role="status" hidden>No hotlines in this category.</p>
                     </div>
-                    <div class="contacts-controls">
-                        <label class="contacts-category-field" for="contactCategory">
-                            <span>Category</span>
-                            <select id="contactCategory" class="contacts-filter">
-                                <option value="all">All categories</option>
-                                <option value="medical">Medical</option>
-                                <option value="security">Security</option>
-                                <option value="utilities">Utilities</option>
-                                <option value="disaster">Disaster</option>
-                                <option value="fire">Fire</option>
+
+                    <section class="guidelines-section" aria-labelledby="guidelinesTitle">
+                        <div class="guidelines-heading">
+                            <div>
+                                <h2 class="section-title" id="guidelinesTitle">Emergency Action Guidelines</h2>
+                                <p class="contacts-description">A quick reference while help is on the way.</p>
+                            </div>
+                            <span class="guidelines-note">Stay calm. Stay safe.</span>
+                        </div>
+                        <div class="guidelines-grid">
+                            @foreach ($guides as $g)
+                            <details class="guideline-card tone-{{ $g['tone'] }}">
+                                <summary><span class="guideline-title">{{ $g['title'] }} <small>{{ $g['call'] }}</small></span></summary>
+                                <div class="guideline-content"><ol>@foreach ($g['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol></div>
+                            </details>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <section class="contacts-admin-actions" aria-label="Contact administration">
+                        <div>
+                            <h2>Keep hotline information current (TEST ONLY)</h2>
+                            <p>Flag a number that needs checking or prepare a contact suggestion.</p>
+                        </div>
+                        <div class="contacts-admin-buttons">
+                            <button class="contacts-secondary-button" type="button" data-open-contact-dialog="reportHotlineDialog">Report unresponsive hotline</button>
+                            <button class="contacts-primary-button" type="button" data-open-contact-dialog="addContactDialog">Add custom contact</button>
+                        </div>
+                        <p class="contacts-demo-note">Admin actions are a preview only; changes are not saved or submitted.</p>
+                    </section>
+
+                    <dialog class="contacts-dialog" id="reportHotlineDialog" aria-labelledby="reportHotlineTitle">
+                        <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
+                        <div class="contacts-dialog-heading">
+                            <div><h2 id="reportHotlineTitle">Report an unresponsive hotline</h2><p>Prepare a note for the admin team.</p></div>
+                        </div>
+                        <form method="dialog" class="contacts-dialog-form" data-preview-form="report">
+                            <label for="reportHotline">Hotline</label>
+                            <select id="reportHotline" name="hotline" required>
+                                <option value="">Choose a hotline</option>
+                                <option>MGA Center - 0919-242-6041</option>
+                                <option>PELCO II - 0919-059-0423</option>
+                                <option>CDRRMO - 0927-611-7634</option>
+                                <option>PNP - 0998-967-3262</option>
+                                <option>PNP - 0948-552-4384</option>
+                                <option>BFP - 0933-990-9960</option>
+                                <option>BFP - 0963-363-6212</option>
                             </select>
-                        </label>
-                    </div>
-                </div>
-                <div class="responder-grid" id="responderGrid">
-                    <section class="responder-card" data-category="medical" data-search="mga center emergency hotline medical ambulance">
-                        <div class="responder-heading">
-                            <span class="responder-mark responder-mark-medical" aria-hidden="true"><svg><use href="#contact-icon-heart-pulse"></use></svg></span>
-                            <div class="responder-info">
-                                <h3 class="responder-name">MGA Center</h3>
-                                <p class="responder-type">Medical Emergency Hotline</p>
-                            </div>
-                        </div>
-                        <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                        <div class="responder-numbers">
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639192426041">0919-242-6041</a>
-                                <a class="contact-action contact-call" href="tel:+639192426041"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0919-242-6041"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                        </div>
-                    </section>
+                            <label for="reportDetails">What happened?</label>
+                            <textarea id="reportDetails" name="details" rows="3" placeholder="Add a short note" required></textarea>
+                            <p class="contacts-dialog-notice" role="status">Preview only. This report will not be sent or stored.</p>
+                            <button class="contacts-primary-button" type="submit">Preview report</button>
+                        </form>
+                    </dialog>
 
-                    <section class="responder-card" data-category="utilities" data-search="pelco ii electric cooperative power electricity utility">
-                        <div class="responder-heading">
-                            <span class="responder-mark responder-mark-utility" aria-hidden="true"><svg><use href="#contact-icon-zap"></use></svg></span>
-                            <div class="responder-info">
-                                <h3 class="responder-name">PELCO II</h3>
-                                <p class="responder-type">Electric Cooperative</p>
-                            </div>
+                    <dialog class="contacts-dialog" id="addContactDialog" aria-labelledby="addContactTitle">
+                        <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog">&times;</button></form>
+                        <div class="contacts-dialog-heading">
+                            <div><h2 id="addContactTitle">Suggest a custom contact</h2><p>Preview the contact details before sharing with your team.</p></div>
                         </div>
-                        <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                        <div class="responder-numbers">
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639190590423">0919-059-0423</a>
-                                <a class="contact-action contact-call" href="tel:+639190590423"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0919-059-0423"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="responder-card" data-category="disaster" data-search="cdrrmo disaster risk reduction management rescue disaster response">
-                        <div class="responder-heading">
-                            <span class="responder-mark responder-mark-disaster" aria-hidden="true"><svg><use href="#contact-icon-shield-plus"></use></svg></span>
-                            <div class="responder-info">
-                                <h3 class="responder-name">CDRRMO</h3>
-                                <p class="responder-type">Disaster Risk Reduction and Management</p>
-                            </div>
-                        </div>
-                        <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                        <div class="responder-numbers">
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639276117634">0927-611-7634</a>
-                                <a class="contact-action contact-call" href="tel:+639276117634"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0927-611-7634"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="responder-card" data-category="security" data-search="pnp philippine national police security police">
-                        <div class="responder-heading">
-                            <span class="responder-mark responder-mark-security" aria-hidden="true"><svg><use href="#contact-icon-shield-check"></use></svg></span>
-                            <div class="responder-info">
-                                <h3 class="responder-name">PNP</h3>
-                                <p class="responder-type">Philippine National Police</p>
-                            </div>
-                        </div>
-                        <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                        <div class="responder-numbers">
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639989673262">0998-967-3262</a>
-                                <a class="contact-action contact-call" href="tel:+639989673262"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0998-967-3262"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639485524384">0948-552-4384</a>
-                                <a class="contact-action contact-call" href="tel:+639485524384"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0948-552-4384"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="responder-card" data-category="fire" data-search="bfp bureau fire protection fire">
-                        <div class="responder-heading">
-                            <span class="responder-mark responder-mark-fire" aria-hidden="true"><svg><use href="#contact-icon-flame"></use></svg></span>
-                            <div class="responder-info">
-                                <h3 class="responder-name">BFP</h3>
-                                <p class="responder-type">Bureau of Fire Protection</p>
-                            </div>
-                        </div>
-                        <span class="availability-badge"><span aria-hidden="true"></span>24/7 Available</span>
-                        <div class="responder-numbers">
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639339909960">0933-990-9960</a>
-                                <a class="contact-action contact-call" href="tel:+639339909960"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0933-990-9960"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                            <div class="responder-number-row">
-                                <a class="responder-phone" href="tel:+639633636212">0963-363-6212</a>
-                                <a class="contact-action contact-call" href="tel:+639633636212"><svg aria-hidden="true"><use href="#contact-icon-phone"></use></svg>Call Now</a>
-                                <button class="contact-action contact-copy" type="button" data-copy-number="0963-363-6212"><svg aria-hidden="true"><use href="#contact-icon-copy"></use></svg>Copy Number</button>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-                <p class="contacts-empty" id="contactsEmpty" role="status" hidden>No hotlines in this category.</p>
-            </div>
-
-            <section class="guidelines-section" aria-labelledby="guidelinesTitle">
-                <div class="guidelines-heading">
-                    <div>
-                        <h2 class="section-title" id="guidelinesTitle"><svg aria-hidden="true"><use href="#contact-icon-book-open-check"></use></svg>Emergency Action Guidelines</h2>
-                        <p class="contacts-description">A quick reference while help is on the way.</p>
-                    </div>
-                    <span class="guidelines-note"><svg aria-hidden="true"><use href="#contact-icon-clock"></use></svg>Stay calm. Stay safe.</span>
-                </div>
-                <div class="guidelines-grid">
-                    <details class="guideline-card">
-                        <summary><span class="guideline-icon guideline-fire"><svg aria-hidden="true"><use href="#contact-icon-flame"></use></svg></span><span class="guideline-title">Fire outbreak <small>Call BFP</small></span><svg class="guideline-chevron" aria-hidden="true"><use href="#contact-icon-chevron-down"></use></svg></summary>
-                        <div class="guideline-content"><ol><li>Warn people nearby and leave using the nearest safe exit.</li><li>Stay low under smoke and do not use elevators.</li><li>Call BFP from a safe location. Never re-enter a burning building.</li></ol></div>
-                    </details>
-                    <details class="guideline-card">
-                        <summary><span class="guideline-icon guideline-utility"><svg aria-hidden="true"><use href="#contact-icon-zap"></use></svg></span><span class="guideline-title">Power interruption or hazard <small>Call PELCO II</small></span><svg class="guideline-chevron" aria-hidden="true"><use href="#contact-icon-chevron-down"></use></svg></summary>
-                        <div class="guideline-content"><ol><li>Stay clear of downed wires and damaged electrical equipment.</li><li>Keep others away from the hazard and move to a safe location.</li><li>Call PELCO II to report the outage or electrical danger.</li></ol></div>
-                    </details>
-                    <details class="guideline-card">
-                        <summary><span class="guideline-icon guideline-medical"><svg aria-hidden="true"><use href="#contact-icon-heart-pulse"></use></svg></span><span class="guideline-title">Medical emergency <small>Call MGA Center</small></span><svg class="guideline-chevron" aria-hidden="true"><use href="#contact-icon-chevron-down"></use></svg></summary>
-                        <div class="guideline-content"><ol><li>Check that the scene is safe before approaching.</li><li>Call MGA Center and share your exact location and the person’s condition.</li><li>Follow the dispatcher’s instructions; avoid moving someone with a serious injury.</li></ol></div>
-                    </details>
-                    <details class="guideline-card">
-                        <summary><span class="guideline-icon guideline-security"><svg aria-hidden="true"><use href="#contact-icon-shield-alert"></use></svg></span><span class="guideline-title">Security threat <small>Call PNP</small></span><svg class="guideline-chevron" aria-hidden="true"><use href="#contact-icon-chevron-down"></use></svg></summary>
-                        <div class="guideline-content"><ol><li>Move away from danger and avoid confronting the threat.</li><li>Call PNP when safe and share your location and observations.</li><li>Follow directions from emergency responders.</li></ol></div>
-                    </details>
-                    <details class="guideline-card">
-                        <summary><span class="guideline-icon guideline-disaster"><svg aria-hidden="true"><use href="#contact-icon-shield-plus"></use></svg></span><span class="guideline-title">Disaster or evacuation <small>Call CDRRMO</small></span><svg class="guideline-chevron" aria-hidden="true"><use href="#contact-icon-chevron-down"></use></svg></summary>
-                        <div class="guideline-content"><ol><li>Follow official evacuation instructions and use marked safe routes.</li><li>Bring essential medication and keep family members together.</li><li>Call CDRRMO for local disaster assistance or rescue.</li></ol></div>
-                    </details>
-                </div>
-            </section>
-
-            <section class="contacts-admin-actions" aria-label="Contact administration">
-                <div>
-                    <h2>Keep hotline information current (TEST ONLY)</h2>
-                    <p>Flag a number that needs checking or prepare a contact suggestion.</p>
-                </div>
-                <div class="contacts-admin-buttons">
-                    <button class="contacts-secondary-button" type="button" data-open-contact-dialog="reportHotlineDialog"><svg aria-hidden="true"><use href="#contact-icon-triangle-alert"></use></svg>Report unresponsive hotline</button>
-                    <button class="contacts-primary-button" type="button" data-open-contact-dialog="addContactDialog"><svg aria-hidden="true"><use href="#contact-icon-user-plus"></use></svg>Add custom contact</button>
-                </div>
-                <p class="contacts-demo-note">Admin actions are a preview only; changes are not saved or submitted.</p>
-            </section>
-
-            <dialog class="contacts-dialog" id="reportHotlineDialog" aria-labelledby="reportHotlineTitle">
-                <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog"><svg aria-hidden="true"><use href="#contact-icon-x"></use></svg></button></form>
-                <div class="contacts-dialog-heading">
-                    <span class="contacts-dialog-icon"><svg aria-hidden="true"><use href="#contact-icon-triangle-alert"></use></svg></span>
-                    <div><h2 id="reportHotlineTitle">Report an unresponsive hotline</h2><p>Prepare a note for the admin team.</p></div>
-                </div>
-                <form method="dialog" class="contacts-dialog-form" data-preview-form="report">
-                    <label for="reportHotline">Hotline</label>
-                    <select id="reportHotline" name="hotline" required>
-                        <option value="">Choose a hotline</option>
-                        <option>MGA Center - 0919-242-6041</option>
-                        <option>PELCO II - 0919-059-0423</option>
-                        <option>CDRRMO - 0927-611-7634</option>
-                        <option>PNP - 0998-967-3262</option>
-                        <option>PNP - 0948-552-4384</option>
-                        <option>BFP - 0933-990-9960</option>
-                        <option>BFP - 0963-363-6212</option>
-                    </select>
-                    <label for="reportDetails">What happened?</label>
-                    <textarea id="reportDetails" name="details" rows="3" placeholder="Add a short note" required></textarea>
-                    <p class="contacts-dialog-notice" role="status">Preview only. This report will not be sent or stored.</p>
-                    <button class="contacts-primary-button" type="submit">Preview report</button>
-                </form>
-            </dialog>
-
-            <dialog class="contacts-dialog" id="addContactDialog" aria-labelledby="addContactTitle">
-                <form method="dialog" class="contacts-dialog-close-form"><button class="contacts-dialog-close" aria-label="Close dialog"><svg aria-hidden="true"><use href="#contact-icon-x"></use></svg></button></form>
-                <div class="contacts-dialog-heading">
-                    <span class="contacts-dialog-icon"><svg aria-hidden="true"><use href="#contact-icon-user-plus"></use></svg></span>
-                    <div><h2 id="addContactTitle">Suggest a custom contact</h2><p>Preview the contact details before sharing with your team.</p></div>
-                </div>
-                <form method="dialog" class="contacts-dialog-form" data-preview-form="contact">
-                    <label for="customContactName">Contact or agency name</label>
-                    <input id="customContactName" name="name" type="text" maxlength="100" placeholder="e.g. Community Rescue Team" required>
-                    <label for="customContactPhone">Phone number</label>
-                    <input id="customContactPhone" name="phone" type="tel" maxlength="24" placeholder="e.g. 09XX-XXX-XXXX" required>
-                    <label for="customContactCategory">Category</label>
-                    <select id="customContactCategory" name="category" required>
-                        <option value="">Choose a category</option>
-                        <option>Medical</option><option>Security</option><option>Utilities</option><option>Disaster</option><option>Other</option>
-                    </select>
-                    <p class="contacts-dialog-notice" role="status">Preview only. This contact will not be saved or added to the hotline list.</p>
-                    <button class="contacts-primary-button" type="submit">Preview contact</button>
-                </form>
-            </dialog>
-        </div>
+                        <form method="dialog" class="contacts-dialog-form" data-preview-form="contact">
+                            <label for="customContactName">Contact or agency name</label>
+                            <input id="customContactName" name="name" type="text" maxlength="100" placeholder="e.g. Community Rescue Team" required>
+                            <label for="customContactPhone">Phone number</label>
+                            <input id="customContactPhone" name="phone" type="tel" maxlength="24" placeholder="e.g. 09XX-XXX-XXXX" required>
+                            <label for="customContactCategory">Category</label>
+                            <select id="customContactCategory" name="category" required>
+                                <option value="">Choose a category</option>
+                                <option>Medical</option><option>Security</option><option>Utilities</option><option>Disaster</option><option>Other</option>
+                            </select>
+                            <p class="contacts-dialog-notice" role="status">Preview only. This contact will not be saved or added to the hotline list.</p>
+                            <button class="contacts-primary-button" type="submit">Preview contact</button>
+                        </form>
+                    </dialog>
+                </div>  
 
         <div id="historyTab" class="tab-content" style="display: none;">
             <div class="alerts-section">

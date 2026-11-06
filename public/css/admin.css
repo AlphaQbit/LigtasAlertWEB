@@ -34,7 +34,7 @@
 
 body {
     font-family: var(--font-body);
-    background: radial-gradient(900px 340px at 85% -80px, rgba(229, 50, 45, .08), transparent 70%), var(--bg);
+    background: var(--bg);
     color: var(--text-primary);
     line-height: 1.5;
     font-variant-numeric: tabular-nums;
@@ -112,7 +112,7 @@ body {
     font-weight: 700;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.admin-profile-avatar:hover { transform: translateY(-1px); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(229, 50, 45, .3); }
+.admin-profile-avatar:hover { transform: translateY(-1px); border-color: var(--primary); }
 .admin-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .admin-profile-initials { line-height: 1; }
 
@@ -212,9 +212,9 @@ body {
 
 /* The loud one: active alerts */
 .stat-card.active {
-    background: linear-gradient(160deg, #F0453F, #C9231E);
+    background: var(--primary);
     border-color: transparent;
-    box-shadow: 0 14px 28px -14px rgba(229, 50, 45, .75);
+    box-shadow: var(--shadow-sm);
 }
 .stat-card.active .stat-number,
 .stat-card.active .stat-label { color: #fff; }
@@ -226,11 +226,6 @@ body {
     margin-right: 0.5rem;
     border-radius: 50%;
     background: #fff;
-    animation: sirenPulse 1.6s ease-out infinite;
-}
-@keyframes sirenPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, .7); }
-    100% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
 }
 
 /* ---------- Alerts ---------- */
@@ -249,7 +244,7 @@ body {
     transition: all 0.2s ease;
 }
 .alert-card:hover { box-shadow: var(--shadow-md); }
-.alert-card.active { background: linear-gradient(180deg, #FFF3F2, #fff 70%); border-color: #F6B8B4; border-left-color: var(--primary); }
+.alert-card.active { background: #FFF3F2; border-color: #F6B8B4; border-left-color: var(--primary); }
 .alert-card.acknowledged { background: #FFFBF1; border-color: #F7D9A0; border-left-color: var(--warning); }
 .alert-card.resolved { background: #F3FBF6; border-color: #CDEBD8; }
 
@@ -305,8 +300,8 @@ body {
 .activity-time { min-width: 70px; color: var(--text-secondary); font-weight: 500; }
 .activity-text { flex: 1; }
 .activity-icon { width: 8px; height: 8px; margin-top: 0.375rem; flex-shrink: 0; border-radius: 50%; }
-.activity-icon.alert { background: var(--danger); box-shadow: 0 0 0 4px rgba(229, 50, 45, .12); }
-.activity-icon.resolved { background: var(--ok-dot); box-shadow: 0 0 0 4px rgba(22, 163, 74, .12); }
+.activity-icon.alert { background: var(--danger); }
+.activity-icon.resolved { background: var(--ok-dot); }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -362,7 +357,7 @@ body {
 .report-bar-row { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; }
 .report-bar-label { flex: 0 0 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-weight: 600; }
 .report-bar-track { flex: 1; height: 12px; background: #F0EEEB; border-radius: 999px; overflow: hidden; }
-.report-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #FF8A80); border-radius: 999px; transition: width 0.3s ease; }
+.report-bar-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width 0.3s ease; }
 .report-bar-count { flex: 0 0 2rem; text-align: right; font-weight: 700; color: var(--text-primary); }
 
 .report-table {
@@ -475,7 +470,7 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
 }
-#contactsTab .availability-badge > span { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--ok-dot); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12); }
+#contactsTab .availability-badge > span { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--ok-dot); }
 
 #contactsTab .responder-numbers { display: grid; align-content: end; gap: 0.5rem; min-width: 0; }
 #contactsTab .responder-number-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 0.375rem; min-width: 0; }
@@ -664,4 +659,296 @@ body {
     #contactsTab .contacts-admin-buttons { flex-direction: column; }
     #contactsTab .contacts-admin-buttons button { width: 100%; }
     #contactsTab .contacts-dialog { padding: 1.125rem; }
+}
+
+
+/* Keeps grid spacing after switchTab() sets display:block */
+.tab-content[style*="display: block"] { display: grid !important; }
+
+/* =========================================================
+   LigtasAlert Admin – PRO visual layer
+   Paste at the VERY BOTTOM of admin.css. CSS only: no markup,
+   JS, API or database changes. Replaces ligtas-sides.css.
+   ========================================================= */
+
+/* ---------- Page background: layered "ops room" canvas ---------- */
+html { scroll-behavior: smooth; }
+body {
+    background:
+        radial-gradient(rgba(21, 24, 35, .06) 1px, transparent 1.4px) 0 0 / 22px 22px,
+        var(--bg);
+    background-attachment: fixed;
+}
+::selection { background: rgba(229, 50, 45, .22); }
+* { scrollbar-width: thin; scrollbar-color: #C9C5BF transparent; }
+
+/* ---------- Header: deeper, with a signal bar ---------- */
+.header { background: var(--ink); }
+.header::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--primary);
+}
+.nav-tab { position: relative; }
+
+/* ---------- Headings: accent bar + trailing hairline ---------- */
+.section-title { font-size: 1.3rem; gap: 0.65rem; }
+.section-title::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 6px;
+    height: 1.15em;
+    border-radius: 3px;
+    background: var(--primary);
+}
+.section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    margin-left: 0.35rem;
+    background: var(--border);
+}
+.reports-header { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm); }
+.reports-header .section-title { margin-bottom: 0; }
+
+/* ---------- Cards: depth + detail ---------- */
+.alert-card:hover { transform: translateY(-2px); }
+/* ---------- Footer (CSS-only, sits at the end of the page) ---------- */
+.container::after {
+    content: "LigtasAlert\A Mabalacat City Emergency Response  \00B7  Stay calm. Stay safe.";
+    white-space: pre-line;
+    margin-top: 1.5rem;
+    padding: 1.6rem 1.5rem 1.4rem;
+    border-radius: 20px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, .62);
+    background:
+        repeating-linear-gradient(135deg, var(--primary) 0 10px, var(--ink) 10px 20px) top / 100% 5px no-repeat,
+        var(--ink);
+    box-shadow: 0 20px 40px -24px rgba(21, 24, 35, .7);
+}
+
+/* ---------- Side gutters (wide screens only) ---------- */
+@media (min-width: 1500px) {
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 0;
+        width: calc((100vw - 1400px) / 2);
+        pointer-events: none;
+    }
+    body::before {
+        left: 0;
+        content: "LigtasAlert for Mabalacat City";
+        display: grid;
+        place-items: center;
+        writing-mode: vertical-rl;
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.4em;
+        color: rgba(21, 24, 35, .17);
+        background:
+            repeating-linear-gradient(135deg, var(--primary) 0 8px, var(--ink) 8px 16px) 0 0 / 7px 100% no-repeat,
+            repeating-radial-gradient(circle at 0 58%, transparent 0 52px, rgba(21, 24, 35, .08) 52px 53px),
+            radial-gradient(rgba(21, 24, 35, .13) 1px, transparent 1.6px) 0 0 / 20px 20px;
+        -webkit-mask-image: linear-gradient(to right, #000 55%, rgba(0, 0, 0, .3));
+                mask-image: linear-gradient(to right, #000 55%, rgba(0, 0, 0, .3));
+    }
+    body::after {
+        right: 0;
+        background:
+            repeating-linear-gradient(45deg, var(--primary) 0 8px, var(--ink) 8px 16px) 100% 0 / 7px 100% no-repeat,
+            repeating-radial-gradient(circle at 100% 30%, transparent 0 52px, rgba(21, 24, 35, .07) 52px 53px),
+            radial-gradient(rgba(21, 24, 35, .11) 1px, transparent 1.6px) 0 0 / 20px 20px;
+        -webkit-mask-image: linear-gradient(to left, #000 55%, rgba(0, 0, 0, .3));
+                mask-image: linear-gradient(to left, #000 55%, rgba(0, 0, 0, .3));
+    }
+    .container { position: relative; z-index: 1; }
+}
+
+/* ---------- Quick-dial rail (only if you added the <aside class="side-rail">) ---------- */
+.side-rail { display: none; }
+@media (min-width: 1700px) {
+    .side-rail {
+        position: fixed;
+        z-index: 5;
+        top: 50%;
+        right: 1.5rem;
+        transform: translateY(-50%);
+        width: 118px;
+        display: grid;
+        gap: 0.55rem;
+        padding: 0.75rem 0.6rem;
+        border-radius: 18px;
+        background: var(--ink);
+        box-shadow: 0 18px 40px -16px rgba(21, 24, 35, .65);
+        color: #fff;
+    }
+    .side-rail-title { margin: 0 0 0.1rem; text-align: center; font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, .7); }
+    .side-rail-link {
+        display: grid;
+        gap: 0.1rem;
+        padding: 0.55rem 0.5rem 0.55rem 0.7rem;
+        border-left: 4px solid var(--rail, #fff);
+        border-radius: 12px;
+        background: var(--ink-2);
+        color: #fff;
+        text-decoration: none;
+        transition: background-color .2s, transform .2s;
+    }
+    .side-rail-link strong { font-family: var(--font-display); font-size: 0.95rem; line-height: 1.1; }
+    .side-rail-link span { font-size: 0.68rem; color: rgba(255, 255, 255, .62); }
+    .side-rail-link:hover, .side-rail-link:focus-visible { background: var(--rail, var(--primary)); transform: translateX(-3px); }
+    .side-rail-link:hover span, .side-rail-link:focus-visible span { color: rgba(255, 255, 255, .9); }
+    .side-rail-medical  { --rail: #0EA5E9; }
+    .side-rail-fire     { --rail: #EF4444; }
+    .side-rail-security { --rail: #3B82F6; }
+    .side-rail-disaster { --rail: #8B5CF6; }
+    .side-rail-utility  { --rail: #EAB308; }
+    .side-rail-status { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 0.15rem; padding-top: 0.6rem; border-top: 1px solid var(--ink-line); font-size: 0.72rem; color: rgba(255, 255, 255, .7); }
+    .side-rail-status i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #22C55E; }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 768px) {
+    .section-title { font-size: 1.15rem; }
+    .container::after { padding: 1.25rem 1rem; font-size: 0.82rem; }
+    .reports-header { padding: 0.85rem 1rem; }
+}
+
+
+/* =========================================================
+   Contacts tab redesign: photo cards, text-only buttons
+   ========================================================= */
+#contactsTab .responder-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.25rem; }
+#contactsTab .contacts-filter { border-radius: 999px; padding-left: 0.9rem; font-weight: 600; }
+
+#contactsTab .responder-card {
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    padding: 0;
+    border-radius: 20px;
+    border-bottom: 4px solid var(--accent, var(--border));
+}
+#contactsTab .responder-card::after { display: none; }
+
+#contactsTab .responder-photo { position: relative; height: 150px; overflow: hidden; background: #E7E4E0; }
+#contactsTab .responder-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+#contactsTab .responder-card:hover .responder-photo img { transform: scale(1.05); }
+
+/* Shown only when the photo file is missing */
+#contactsTab .responder-photo.no-photo { display: grid; place-items: center; background: var(--accent, #475569); }
+#contactsTab .responder-photo.no-photo::before { content: attr(data-label); font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; letter-spacing: 0.04em; color: rgba(255, 255, 255, .92); }
+#contactsTab .responder-card[data-category="utilities"] .no-photo::before { color: var(--ink); }
+
+#contactsTab .responder-tag {
+    position: absolute;
+    left: 0.85rem;
+    bottom: 0.85rem;
+    z-index: 1;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--accent, var(--ink));
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+#contactsTab .responder-card[data-category="utilities"] .responder-tag { color: var(--ink); }
+#contactsTab .no-photo .responder-tag { background: rgba(255, 255, 255, .24); color: #fff; }
+#contactsTab .responder-card[data-category="utilities"] .no-photo .responder-tag { color: var(--ink); }
+
+#contactsTab .responder-body { display: grid; grid-template-rows: auto auto 1fr; gap: 0.85rem; min-width: 0; padding: 1.1rem 1.25rem 1.25rem; }
+#contactsTab .responder-name { font-size: 1.3rem; }
+#contactsTab .responder-numbers { gap: 0.75rem; }
+#contactsTab .responder-phone { font-size: 1.35rem; }
+
+/* Guidelines: no icons, colour bar + numbered steps */
+#contactsTab .guideline-card { --tone: #64748B; --tone-ink: #fff; overflow: hidden; border-left: 5px solid var(--tone); }
+#contactsTab .guideline-card[open] { border-left-color: var(--tone); }
+#contactsTab .tone-fire     { --tone: #DC2626; }
+#contactsTab .tone-utility  { --tone: #EAB308; --tone-ink: #1B1E2B; }
+#contactsTab .tone-medical  { --tone: #0284C7; }
+#contactsTab .tone-security { --tone: #1D4ED8; }
+#contactsTab .tone-disaster { --tone: #7C3AED; }
+#contactsTab .guideline-card summary { min-height: 0; padding: 1.1rem 1.1rem 1.1rem 1.25rem; }
+#contactsTab .guideline-card summary::after { content: "+"; margin-left: auto; font-size: 1.5rem; font-weight: 500; line-height: 1; color: var(--text-secondary); }
+#contactsTab .guideline-card[open] summary::after { content: "\2212"; }
+#contactsTab .guideline-content { padding: 0 1.1rem 1.1rem 1.25rem; }
+#contactsTab .guideline-content ol { gap: 0.7rem; padding-left: 0; list-style: none; counter-reset: step; }
+#contactsTab .guideline-content li { display: flex; align-items: flex-start; gap: 0.7rem; counter-increment: step; }
+#contactsTab .guideline-content li::before {
+    content: counter(step);
+    display: grid;
+    flex: 0 0 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--tone);
+    color: var(--tone-ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+#contactsTab .contacts-dialog-close { font-size: 1.4rem; line-height: 1; }
+
+
+/* =========================================================
+   Hotline carousel: larger cards, swipe / arrows / auto-scroll
+   ========================================================= */
+#contactsTab .responder-grid {
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+    padding: 0.5rem 0 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+}
+#contactsTab .responder-grid::-webkit-scrollbar { display: none; }
+#contactsTab .responder-grid.is-dragging { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; user-select: none; }
+#contactsTab .responder-grid:focus-visible { outline-offset: 4px; border-radius: 20px; }
+
+#contactsTab .responder-card { flex: 0 0 min(86%, 400px); scroll-snap-align: start; box-shadow: var(--shadow-md); }
+#contactsTab .responder-photo { height: 200px; }
+#contactsTab .responder-photo img { pointer-events: none; -webkit-user-drag: none; }
+#contactsTab .responder-photo.no-photo::before { font-size: 3rem; }
+#contactsTab .responder-body { gap: 1rem; padding: 1.35rem 1.5rem 1.5rem; }
+#contactsTab .responder-name { font-size: 1.5rem; }
+#contactsTab .responder-type { font-size: 0.9rem; }
+#contactsTab .responder-phone { padding: 0.8rem 0.75rem; font-size: 1.55rem; }
+#contactsTab .contact-action { min-height: 3.1rem; font-size: 0.82rem; }
+
+/* Carousel controls */
+.hotline-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; }
+.hotline-bar[hidden] { display: none; }
+.hotline-auto { padding: 0.45rem 0.95rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background-color .2s, color .2s, border-color .2s; }
+.hotline-auto[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.hotline-dots { display: flex; align-items: center; justify-content: center; flex: 1; }
+.hotline-dot { width: 1.3rem; height: 1.3rem; padding: 0.35rem; border: 0; border-radius: 999px; background: #CFCAC3; background-clip: content-box; cursor: pointer; transition: width .25s, background-color .25s; }
+.hotline-dot.on { width: 2.4rem; background-color: var(--primary); background-clip: content-box; }
+.hotline-arrows { display: flex; gap: 0.5rem; }
+.hotline-arrow { width: 2.75rem; height: 2.75rem; padding-bottom: 0.2rem; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text-primary); font-size: 1.6rem; line-height: 1; cursor: pointer; transition: background-color .2s, color .2s, border-color .2s; }
+.hotline-arrow:hover:not(:disabled) { background: var(--ink); border-color: var(--ink); color: #fff; }
+.hotline-arrow:disabled { opacity: .35; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+    #contactsTab .responder-grid { scroll-behavior: auto; }
+}
+@media (max-width: 480px) {
+    #contactsTab .responder-grid { gap: 1rem; }
+    .hotline-dots { order: 3; flex-basis: 100%; }
 }
