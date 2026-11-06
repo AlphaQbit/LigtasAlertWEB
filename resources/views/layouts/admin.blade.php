@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
+@include('auth-loading')
 @yield('content')
 
 <footer class="site-footer">

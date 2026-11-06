@@ -27,7 +27,7 @@ class AuthController extends Controller
         return view('auth', ['mode' => 'register']);
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(Request $request): View|RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
@@ -37,13 +37,15 @@ class AuthController extends Controller
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withInput($request->only('email', 'remember'))
-                ->withErrors(['email' => 'These credentials do not match our records.']);
+                ->withErrors([
+                    'email' => 'These credentials do not match our records.',
+                ]);
         }
 
         $request->session()->forget('microsoft_profile');
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin'));
+        return $this->showLoadingScreen();
     }
 
     public function register(Request $request): RedirectResponse
@@ -81,30 +83,47 @@ class AuthController extends Controller
             ->redirect();
     }
 
-    public function microsoftCallback(Request $request): RedirectResponse
+    public function microsoftCallback(Request $request): View|RedirectResponse
     {
         try {
             $microsoftUser = Socialite::driver('microsoft')->user();
         } catch (Throwable $exception) {
             report($exception);
 
-            return redirect()->route('login')->withErrors(['email' => 'Microsoft sign-in failed. Please try again.']);
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Microsoft sign-in failed. Please try again.',
+                ]);
         }
 
         $email = $microsoftUser->getEmail();
 
         if (! $email) {
-            return redirect()->route('login')->withErrors(['email' => 'Your Microsoft account did not share an email address.']);
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Your Microsoft account did not share an email address.',
+                ]);
         }
 
-        $user = User::updateOrCreate(
+        // Generate a password only for new Microsoft users.
+        // Existing users keep their current password.
+        $user = User::firstOrCreate(
             ['email' => $email],
-            ['name' => $microsoftUser->getName() ?: $email, 'password' => Str::password(32)],
+            [
+                'name' => $microsoftUser->getName() ?: $email,
+                'password' => Str::password(32),
+            ],
         );
+
+        $user->name = $microsoftUser->getName() ?: $email;
+        $user->save();
 
         Auth::login($user, remember: true);
 
         $request->session()->regenerate();
+
         $request->session()->put('microsoft_profile', [
             'user_id' => $user->id,
             'name' => $user->name,
@@ -112,8 +131,15 @@ class AuthController extends Controller
             'photo' => $this->microsoftProfilePhoto($microsoftUser->token),
         ]);
 
-        return redirect()->intended(route('admin'));
+        return $this->showLoadingScreen();
     }
+
+        private function showLoadingScreen(): RedirectResponse
+        {
+            session()->flash('auth_loading', true);
+
+            return redirect()->intended(route('admin'));
+        }
 
     private function microsoftProfilePhoto(?string $accessToken): ?string
     {
@@ -133,16 +159,27 @@ class AuthController extends Controller
         }
 
         if (! $response->successful()) {
-            Log::notice('Microsoft profile photo is unavailable.', ['status' => $response->status()]);
+            Log::notice('Microsoft profile photo is unavailable.', [
+                'status' => $response->status(),
+            ]);
 
             return null;
         }
 
-        $contentType = strtolower(trim(explode(';', $response->header('Content-Type', ''))[0]));
+        $contentType = strtolower(
+            trim(explode(';', $response->header('Content-Type', ''))[0])
+        );
+
         $photo = $response->body();
 
-        if (! in_array($contentType, ['image/jpeg', 'image/png', 'image/gif'], true) || $photo === '' || strlen($photo) > 1_000_000) {
-            Log::warning('Microsoft profile photo response had an unsupported format or size.');
+        if (
+            ! in_array($contentType, ['image/jpeg', 'image/png', 'image/gif'], true)
+            || $photo === ''
+            || strlen($photo) > 1_000_000
+        ) {
+            Log::warning(
+                'Microsoft profile photo response had an unsupported format or size.'
+            );
 
             return null;
         }
