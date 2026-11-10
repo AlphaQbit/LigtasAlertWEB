@@ -155,8 +155,14 @@ function renderStats(stats) {
 
 function renderAlertCards(alerts, grid, emptyMessage, includeActions) {
     if (!alerts.length) {
-        grid.innerHTML = `<div class="loading"><span class="lucide lucide-siren" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>${emptyMessage}</div>`;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        grid.innerHTML = `<div class="loading">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;">
+    <path d="M6.74 18.83A7 7 0 1 0 17.26 5.17 7 7 0 0 0 6.74 18.83z" />
+    <path d="M12 14v6" />
+    <path d="M9.1 16a4.5 4.5 0 1 1 5.8 0" />
+  </svg>
+  ${emptyMessage}
+</div>`;
         return;
     }
 
@@ -218,8 +224,13 @@ function renderActivity(alerts) {
     const log = document.getElementById('activityLog');
 
     if (!alerts.length) {
-        log.innerHTML = '<div class="loading"><span class="lucide lucide-clock" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>No recent activity</div>';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        log.innerHTML = `<div class="loading">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 6v6l4 2" />
+  </svg>
+  No recent activity
+</div>`;
         return;
     }
 
@@ -446,8 +457,14 @@ function renderReportBars(containerId, rows, labelKey) {
     if (!container) return;
 
     if (!rows.length) {
-        container.innerHTML = '<div class="loading"><span class="lucide lucide-chart-no-axes-column" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;"></span>No data in this range</div>';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        container.innerHTML = `<div class="loading">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;margin:0 auto 0.5rem;">
+    <path d="M13 17V9" />
+    <path d="M18 17V5" />
+    <path d="M8 17v-3" />
+  </svg>
+  No data in this range
+</div>`;
         return;
     }
 
